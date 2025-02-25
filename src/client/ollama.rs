@@ -1,6 +1,4 @@
-use std::sync::Arc;
-
-use serde::Serialize;
+use std::{fmt::Debug, sync::Arc};
 
 use crate::abi::{
     chat::{ChatRequest, ChatResponse},
@@ -25,7 +23,7 @@ impl OllamaClient {
         Self { cli, config }
     }
 
-    pub async fn post<T: OllamaRequest + Serialize>(
+    pub async fn post<T: OllamaRequest + Debug>(
         &self,
         path: &str,
         data: &T,
@@ -220,6 +218,50 @@ mod tests {
 
         let e = s.err().unwrap().to_string();
         assert_eq!(e, "feature not available: stream");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn create_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama
+            .create_model("yuanshen")
+            .from("llama3.1:8b")
+            .system("You are a model who is good at playing Yuanshen")
+            .await
+            .unwrap();
+
+        println!("resp: {resp:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn create_model_with_stream_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let mut resp = ollama
+            .create_model("yuanshen")
+            .from("llama3.1:8b")
+            .system("You are a model who is good at playing Yuanshen")
+            .stream()
+            .await
+            .unwrap();
+
+        let mut out = stdout();
+        out.write(b"xxxxxxxx\n").await.unwrap();
+        out.flush().await.unwrap();
+
+        while let Some(item) = resp.next().await {
+            match item {
+                Ok(item) => {
+                    out.write(item.status.as_bytes()).await.unwrap();
+                    out.flush().await.unwrap();
+                }
+                Err(e) => panic!("{}", e),
+            }
+        }
+
+        out.write(b"\n").await.unwrap();
+        out.flush().await.unwrap();
     }
 
     fn mock_config() -> OllamaConfig {
