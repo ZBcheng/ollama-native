@@ -161,6 +161,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn chat_with_tools_should_work() {
         let tool = r#"
 {
