@@ -89,7 +89,7 @@ pub enum RequestMethod {
 }
 
 #[async_trait]
-pub trait OllamaResponse: DeserializeOwned + Debug + Send + Sync + 'static {
+pub trait OllamaResponse: DeserializeOwned + Send + Sync + 'static {
     async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError>;
 
     #[cfg(feature = "stream")]
