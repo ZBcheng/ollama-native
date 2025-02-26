@@ -76,7 +76,7 @@ impl Action<ChatRequest, ChatResponse> {
     }
 
     /// Controls how long the model will stay loaded into memory following the request (default: 5m).
-    pub fn keep_alive(mut self, keep_alive: usize) -> Self {
+    pub fn keep_alive(mut self, keep_alive: i64) -> Self {
         self.request.keep_alive = Some(keep_alive);
         self
     }
@@ -107,14 +107,14 @@ impl Action<ChatRequest, ChatResponse> {
 
     /// Sets the size of the context window used to generate the next token.
     /// (Default: 2048).
-    pub fn num_ctx(mut self, num_ctx: i32) -> Self {
+    pub fn num_ctx(mut self, num_ctx: i64) -> Self {
         self.request.options.num_ctx(num_ctx);
         self
     }
 
     /// Sets how far back for the model to look back to prevent repetition.
     /// (Default: 64, 0 = disabled, -1 = num_ctx).
-    pub fn repeat_last_n(mut self, repeat_last_n: i32) -> Self {
+    pub fn repeat_last_n(mut self, repeat_last_n: i64) -> Self {
         self.request.options.repeat_last_n(repeat_last_n);
         self
     }
@@ -137,7 +137,7 @@ impl Action<ChatRequest, ChatResponse> {
     /// Sets the random number seed to use for generation. Setting this to a specific number
     /// will make the model generate the same text for the same prompt.
     /// (Default: 0).
-    pub fn seed(mut self, seed: i32) -> Self {
+    pub fn seed(mut self, seed: i64) -> Self {
         self.request.options.seed(seed);
         self
     }
@@ -152,7 +152,7 @@ impl Action<ChatRequest, ChatResponse> {
 
     /// Maximum number of tokens to predict when generating text.
     /// (Default: -1, infinite generation)
-    pub fn num_predict(mut self, num_predict: i32) -> Self {
+    pub fn num_predict(mut self, num_predict: i64) -> Self {
         self.request.options.num_predict(num_predict);
         self
     }
@@ -160,7 +160,7 @@ impl Action<ChatRequest, ChatResponse> {
     /// Reduces the probability of generating nonsense. A higher value (e.g. 100) will give
     /// more diverse answers, while a lower value (e.g. 10) will be more conservative.
     /// (Default: 40)
-    pub fn top_k(mut self, top_k: i32) -> Self {
+    pub fn top_k(mut self, top_k: i64) -> Self {
         self.request.options.top_k(top_k);
         self
     }

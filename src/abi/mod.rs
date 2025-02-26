@@ -122,12 +122,12 @@ pub struct Parameter {
     /// Sets the size of the context window used to generate the next token.
     /// (Default: 2048).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub num_ctx: Option<i32>,
+    pub num_ctx: Option<i64>,
 
     /// Sets how far back for the model to look back to prevent repetition.
     /// (Default: 64, 0 = disabled, -1 = num_ctx).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub repeat_last_n: Option<i32>,
+    pub repeat_last_n: Option<i64>,
 
     /// Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will penalize
     /// repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient.
@@ -144,7 +144,7 @@ pub struct Parameter {
     /// will make the model generate the same text for the same prompt.
     /// (Default: 0).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub seed: Option<i32>,
+    pub seed: Option<i64>,
 
     /// Sets the stop sequences to use. When this pattern is encountered the LLM will stop
     /// generating text and return. Multiple stop patterns may be set by specifying multiple
@@ -155,13 +155,13 @@ pub struct Parameter {
     /// Maximum number of tokens to predict when generating text.
     /// (Default: -1, infinite generation).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub num_predict: Option<i32>,
+    pub num_predict: Option<i64>,
 
     /// Reduces the probability of generating nonsense. A higher value (e.g. 100) will give
     /// more diverse answers, while a lower value (e.g. 10) will be more conservative.
     /// (Default: 40).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub top_k: Option<i32>,
+    pub top_k: Option<i64>,
 
     /// Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text,
     /// while a lower value (e.g., 0.5) will generate more focused and conservative text.
@@ -191,11 +191,11 @@ impl Parameter {
         self.mirostat_tau = Some(mirostat_tau);
     }
 
-    pub fn num_ctx(&mut self, num_ctx: i32) {
+    pub fn num_ctx(&mut self, num_ctx: i64) {
         self.num_ctx = Some(num_ctx);
     }
 
-    pub fn repeat_last_n(&mut self, repeat_last_n: i32) {
+    pub fn repeat_last_n(&mut self, repeat_last_n: i64) {
         self.repeat_last_n = Some(repeat_last_n);
     }
 
@@ -207,7 +207,7 @@ impl Parameter {
         self.temperature = Some(temperature);
     }
 
-    pub fn seed(&mut self, seed: i32) {
+    pub fn seed(&mut self, seed: i64) {
         self.seed = Some(seed);
     }
 
@@ -215,11 +215,11 @@ impl Parameter {
         self.stop = Some(stop.to_string());
     }
 
-    pub fn num_predict(&mut self, num_predict: i32) {
+    pub fn num_predict(&mut self, num_predict: i64) {
         self.num_predict = Some(num_predict);
     }
 
-    pub fn top_k(&mut self, top_k: i32) {
+    pub fn top_k(&mut self, top_k: i64) {
         self.top_k = Some(top_k);
     }
 

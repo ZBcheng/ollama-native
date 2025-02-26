@@ -53,7 +53,7 @@ pub struct GenerateRequest {
 
     /// Controls how long the model will stay loaded into memory following the request (default: 5m).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub keep_alive: Option<usize>,
+    pub keep_alive: Option<i64>,
 }
 
 #[derive(Debug, Clone, Deserialize)]
@@ -72,26 +72,26 @@ pub struct GenerateResponse {
     pub done_reason: Option<String>,
 
     /// Time spent generating the response.
-    pub total_duration: Option<usize>,
+    pub total_duration: Option<i64>,
 
     /// Time spent in nanoseconds loading the model.
-    pub load_duration: Option<usize>,
+    pub load_duration: Option<i64>,
 
     /// Number of tokens in the prompt.
-    pub prompt_eval_count: Option<usize>,
+    pub prompt_eval_count: Option<i64>,
 
     /// Time in nanoseconds spent generating the response
-    pub prompt_eval_duration: Option<usize>,
+    pub prompt_eval_duration: Option<i64>,
 
     /// An encoding of the conversation used in this response,
     /// this can be sent in the next request to keep a conversational memory.
-    pub context: Option<Vec<usize>>,
+    pub context: Option<Vec<i64>>,
 
     /// Number of tokens in the response.
-    pub eval_count: Option<usize>,
+    pub eval_count: Option<i64>,
 
     /// Time in nanoseconds spent generating the response.
-    pub eval_duration: Option<usize>,
+    pub eval_duration: Option<i64>,
 }
 
 impl OllamaRequest for GenerateRequest {

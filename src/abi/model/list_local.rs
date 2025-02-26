@@ -18,7 +18,7 @@ pub struct ListLocalModelsResponse {
 pub struct ModelInfo {
     pub name: String,
     pub modified_at: String,
-    pub size: usize,
+    pub size: i64,
     pub digest: String,
     pub details: ModelInfoDetail,
 }
