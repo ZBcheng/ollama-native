@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 use crate::client::{OllamaRequest, OllamaResponse, RequestMethod};
 use crate::error::OllamaError;
 
+use super::ModelInfoDetail;
+
 #[derive(Serialize, Default)]
 pub struct ListLocalModelsRequest {}
 
@@ -21,15 +23,6 @@ pub struct ModelInfo {
     pub details: ModelInfoDetail,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct ModelInfoDetail {
-    pub format: String,
-    pub family: String,
-    pub families: Option<Vec<String>>,
-    pub parameter_size: String,
-    pub quantization_level: String,
-}
-
 impl OllamaRequest for ListLocalModelsRequest {
     fn path(&self) -> &str {
         "/api/tags"
@@ -41,7 +34,7 @@ impl OllamaRequest for ListLocalModelsRequest {
 
     #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), crate::error::OllamaError> {
-        Err(OllamaError::FeatureNotAvailable("stream".into()))
+        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
 }
 
@@ -56,10 +49,7 @@ impl OllamaResponse for ListLocalModelsResponse {
     }
 
     #[cfg(feature = "stream")]
-    async fn parse_chunk(chunk: bytes::Bytes) -> Result<Self, OllamaError> {
-        match serde_json::from_slice(&chunk) {
-            Ok(r) => Ok(r),
-            Err(e) => Err(OllamaError::StreamDecodingError(e)),
-        }
+    async fn parse_chunk(_: bytes::Bytes) -> Result<Self, OllamaError> {
+        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
 }
