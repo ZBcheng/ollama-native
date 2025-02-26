@@ -39,6 +39,7 @@ impl OllamaRequest for ShowModelInformationRequest {
         RequestMethod::POST
     }
 
+    #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), crate::error::OllamaError> {
         Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }

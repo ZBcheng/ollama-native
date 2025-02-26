@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use serde::Serialize;
 
-use crate::abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -13,8 +12,10 @@ use crate::abi::completion::{
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
+    copy::{CopyModelRequest, CopyModelResponse},
     create::{CreateModelRequest, CreateModelResponse},
     list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
+    show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
 };
 
 use super::{Action, OllamaRequest, RequestMethod};
