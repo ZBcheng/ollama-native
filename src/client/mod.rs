@@ -8,7 +8,7 @@ pub mod model;
 #[cfg(feature = "embedding")]
 pub mod embedding;
 
-use std::{fmt::Debug, marker::PhantomData, sync::Arc};
+use std::{marker::PhantomData, sync::Arc};
 
 use async_trait::async_trait;
 use futures::future::BoxFuture;
@@ -54,7 +54,7 @@ pub type OllamaStream<T> = Pin<Box<dyn Stream<Item = Result<T, OllamaError>>>>;
 
 #[cfg(feature = "stream")]
 #[allow(dead_code)]
-impl<Request: OllamaRequest + Debug, Response: OllamaResponse> Action<Request, Response> {
+impl<Request: OllamaRequest, Response: OllamaResponse> Action<Request, Response> {
     async fn stream(mut self) -> Result<OllamaStream<Response>, OllamaError> {
         let _ = self.request.set_stream()?;
         let mut reqwest_stream = self.ollama.request(&self.request).await?.bytes_stream();
