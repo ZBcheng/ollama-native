@@ -41,6 +41,17 @@ impl OllamaClient {
             .map_err(|e| OllamaError::RequestError(e))?;
         Ok(response)
     }
+
+    pub async fn get(&self, path: &str) -> Result<reqwest::Response, OllamaError> {
+        let url = format!("{}{}", self.config.url, path);
+        let response = self
+            .cli
+            .get(url)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(response)
+    }
 }
 
 pub struct Ollama {
