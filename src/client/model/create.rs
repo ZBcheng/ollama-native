@@ -127,7 +127,7 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     /// A lower learning rate will result in slower adjustments, while a higher learning
     /// rate will make the algorithm more responsive.
     /// (Default: 0.1).
-    pub fn mirostat_eta(mut self, mirostat_eta: f32) -> Self {
+    pub fn mirostat_eta(mut self, mirostat_eta: f64) -> Self {
         self.request.parameters.mirostat_eta(mirostat_eta);
         self
     }
@@ -135,7 +135,7 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     /// Controls the balance between coherence and diversity of the output. A lower value
     /// will result in more focused and coherent text.
     /// (Default: 5.0).
-    pub fn mirostat_tau(mut self, mirostat_tau: f32) -> Self {
+    pub fn mirostat_tau(mut self, mirostat_tau: f64) -> Self {
         self.request.parameters.mirostat_tau(mirostat_tau);
         self
     }
@@ -157,14 +157,14 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     /// Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will penalize
     /// repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient.
     /// (Default: 1.1).
-    pub fn repeat_penalty(mut self, repeat_penalty: f32) -> Self {
+    pub fn repeat_penalty(mut self, repeat_penalty: f64) -> Self {
         self.request.parameters.repeat_penalty(repeat_penalty);
         self
     }
 
     /// The temperature of the model. Increasing the temperature will make the model answer more creatively.
     /// (Default: 0.8).
-    pub fn temperature(mut self, temperature: f32) -> Self {
+    pub fn temperature(mut self, temperature: f64) -> Self {
         self.request.parameters.temperature(temperature);
         self
     }
@@ -203,7 +203,7 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     /// Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text,
     /// while a lower value (e.g., 0.5) will generate more focused and conservative text.
     /// (Default: 0.9)
-    pub fn top_p(mut self, top_p: f32) -> Self {
+    pub fn top_p(mut self, top_p: f64) -> Self {
         self.request.parameters.top_p(top_p);
         self
     }
@@ -213,7 +213,7 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     /// of the most likely token. For example, with p=0.05 and the most likely token having a probability
     /// of 0.9, logits with a value less than 0.045 are filtered out.
     /// (Default: 0.0)
-    pub fn min_p(mut self, min_p: f32) -> Self {
+    pub fn min_p(mut self, min_p: f64) -> Self {
         self.request.parameters.min_p(min_p);
         self
     }

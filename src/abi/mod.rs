@@ -111,13 +111,13 @@ pub struct Parameter {
     /// rate will make the algorithm more responsive.
     /// (Default: 0.1).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mirostat_eta: Option<f32>,
+    pub mirostat_eta: Option<f64>,
 
     /// Controls the balance between coherence and diversity of the output. A lower value
     /// will result in more focused and coherent text.
     /// (Default: 5.0).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub mirostat_tau: Option<f32>,
+    pub mirostat_tau: Option<f64>,
 
     /// Sets the size of the context window used to generate the next token.
     /// (Default: 2048).
@@ -133,12 +133,12 @@ pub struct Parameter {
     /// repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient.
     /// (Default: 1.1).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub repeat_penalty: Option<f32>,
+    pub repeat_penalty: Option<f64>,
 
     /// The temperature of the model. Increasing the temperature will make the model answer more creatively.
     /// (Default: 0.8).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub temperature: Option<f32>,
+    pub temperature: Option<f64>,
 
     /// Sets the random number seed to use for generation. Setting this to a specific number
     /// will make the model generate the same text for the same prompt.
@@ -167,7 +167,7 @@ pub struct Parameter {
     /// while a lower value (e.g., 0.5) will generate more focused and conservative text.
     /// (Default: 0.9).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub top_p: Option<f32>,
+    pub top_p: Option<f64>,
 
     /// Alternative to the top_p, and aims to ensure a balance of quality and variety. The parameter
     /// p represents the minimum probability for a token to be considered, relative to the probability
@@ -175,7 +175,7 @@ pub struct Parameter {
     /// of 0.9, logits with a value less than 0.045 are filtered out.
     /// (Default: 0.0).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub min_p: Option<f32>,
+    pub min_p: Option<f64>,
 }
 
 impl Parameter {
@@ -183,11 +183,11 @@ impl Parameter {
         self.mirostat = Some(mirostat);
     }
 
-    pub fn mirostat_eta(&mut self, mirostat_eta: f32) {
+    pub fn mirostat_eta(&mut self, mirostat_eta: f64) {
         self.mirostat_eta = Some(mirostat_eta);
     }
 
-    pub fn mirostat_tau(&mut self, mirostat_tau: f32) {
+    pub fn mirostat_tau(&mut self, mirostat_tau: f64) {
         self.mirostat_tau = Some(mirostat_tau);
     }
 
@@ -199,11 +199,11 @@ impl Parameter {
         self.repeat_last_n = Some(repeat_last_n);
     }
 
-    pub fn repeat_penalty(&mut self, repeat_penalty: f32) {
+    pub fn repeat_penalty(&mut self, repeat_penalty: f64) {
         self.repeat_penalty = Some(repeat_penalty);
     }
 
-    pub fn temperature(&mut self, temperature: f32) {
+    pub fn temperature(&mut self, temperature: f64) {
         self.temperature = Some(temperature);
     }
 
@@ -223,11 +223,11 @@ impl Parameter {
         self.top_k = Some(top_k);
     }
 
-    pub fn top_p(&mut self, top_p: f32) {
+    pub fn top_p(&mut self, top_p: f64) {
         self.top_p = Some(top_p);
     }
 
-    pub fn min_p(&mut self, min_p: f32) {
+    pub fn min_p(&mut self, min_p: f64) {
         self.min_p = Some(min_p);
     }
 
