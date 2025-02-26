@@ -42,11 +42,7 @@ where
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let resp = self
-                .ollama
-                .post(&self.request.path(), &self.request)
-                .await?;
-
+            let resp = self.ollama.request(&self.request).await?;
             let output = Response::parse_response(resp).await?;
             Ok(output)
         })
@@ -61,11 +57,7 @@ pub type OllamaStream<T> = Pin<Box<dyn Stream<Item = Result<T, OllamaError>>>>;
 impl<Request: OllamaRequest + Debug, Response: OllamaResponse> Action<Request, Response> {
     async fn stream(mut self) -> Result<OllamaStream<Response>, OllamaError> {
         let _ = self.request.set_stream()?;
-        let mut reqwest_stream = self
-            .ollama
-            .post(&self.request.path(), &self.request)
-            .await?
-            .bytes_stream();
+        let mut reqwest_stream = self.ollama.request(&self.request).await?.bytes_stream();
 
         let s = stream! {
             while let Some(item) = reqwest_stream.next().await {
