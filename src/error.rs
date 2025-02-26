@@ -16,14 +16,14 @@ pub enum OllamaError {
 
     #[error("invalid format: {0}")]
     InvalidFormat(String),
+
+    #[error("model doesn't exist")]
+    ModelDoesNotExist,
+
+    #[error("unknown error: {0}")]
+    UnknownError(String),
 }
 
 unsafe impl Send for OllamaError {}
 
 unsafe impl Sync for OllamaError {}
-
-// impl From<reqwest::Error> for OllamaError {
-//     fn from(e: reqwest::Error) -> Self {
-//         Self::RequestError(e)
-//     }
-// }
