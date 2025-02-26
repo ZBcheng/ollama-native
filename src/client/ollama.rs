@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use serde::Serialize;
 
+use crate::abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -109,6 +110,17 @@ impl Ollama {
     /// List models that are available locally.
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
         Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(Arc::clone(&self.client))
+    }
+
+    /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
+    pub fn show_model_information(
+        &self,
+        model: &str,
+    ) -> Action<ShowModelInformationRequest, ShowModelInformationResponse> {
+        Action::<ShowModelInformationRequest, ShowModelInformationResponse>::new(
+            Arc::clone(&self.client),
+            model,
+        )
     }
 }
 
@@ -294,6 +306,13 @@ mod tests {
 
         out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn show_model_information_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let model_info = ollama.show_model_information("llama3.1:8b").await.unwrap();
+        println!("{model_info:?}");
     }
 
     #[tokio::test]
