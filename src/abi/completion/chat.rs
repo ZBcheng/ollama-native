@@ -2,11 +2,10 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
-    client::{OllamaRequest, OllamaResponse},
+    abi::{Message, Parameter, Role},
+    client::{OllamaRequest, OllamaResponse, RequestMethod},
     error::OllamaError,
 };
-
-use super::{Message, Parameter, Role};
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct ChatRequest {
@@ -130,6 +129,10 @@ impl Serialize for Format {
 impl OllamaRequest for ChatRequest {
     fn path(&self) -> &str {
         "/api/chat"
+    }
+
+    fn method(&self) -> RequestMethod {
+        RequestMethod::POST
     }
 
     #[cfg(feature = "stream")]

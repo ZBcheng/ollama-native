@@ -1,10 +1,9 @@
 use serde::{Deserialize, Serialize};
 
-pub mod chat;
-pub mod generate;
+pub mod completion;
 
 #[cfg(feature = "model")]
-pub mod create_model;
+pub mod model;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Message {

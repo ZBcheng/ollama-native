@@ -1,16 +1,17 @@
 use std::{fmt::Debug, sync::Arc};
 
-use crate::abi::{
+use crate::abi::completion::{
     chat::{ChatRequest, ChatResponse},
     generate::{GenerateRequest, GenerateResponse},
 };
-use crate::config::OllamaConfig;
-use crate::error::OllamaError;
 
 #[cfg(feature = "model")]
-use crate::abi::create_model::{CreateModelRequest, CreateModelResponse};
+use crate::abi::model::{
+    create::{CreateModelRequest, CreateModelResponse},
+    list_local::{ListLocalModelResponse, ListLocalModelsRequest},
+};
 
-use super::{Action, OllamaRequest};
+use super::{Action, OllamaRequest, RequestMethod};
 
 pub struct OllamaClient {
     cli: reqwest::Client,
@@ -25,7 +26,6 @@ impl OllamaClient {
 
     pub async fn post<T: OllamaRequest + Debug>(
         &self,
-        path: &str,
         data: &T,
     ) -> Result<reqwest::Response, OllamaError> {
         let url = format!("{}{}", self.config.url, path);
@@ -89,6 +89,11 @@ impl Ollama {
     /// blob in the files field.
     pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
         Action::<CreateModelRequest, CreateModelResponse>::new(Arc::clone(&self.client), model)
+    }
+
+    /// List models that are available locally.
+    pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelResponse> {
+        Action::<ListLocalModelsRequest, ListLocalModelResponse>::new(Arc::clone(&self.client))
     }
 }
 

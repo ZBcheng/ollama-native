@@ -4,11 +4,10 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{OllamaRequest, OllamaResponse},
+    abi::{Message, Parameter},
+    client::{OllamaRequest, OllamaResponse, RequestMethod},
     error::OllamaError,
 };
-
-use super::{Message, Parameter};
 
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CreateModelRequest {
@@ -66,6 +65,10 @@ pub struct CreateModelResponse {
 impl OllamaRequest for CreateModelRequest {
     fn path(&self) -> &str {
         "/api/create"
+    }
+
+    fn method(&self) -> RequestMethod {
+        RequestMethod::POST
     }
 
     #[cfg(feature = "stream")]

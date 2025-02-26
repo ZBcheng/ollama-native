@@ -1,7 +1,7 @@
 use std::{marker::PhantomData, sync::Arc};
 
 use crate::{
-    abi::generate::{GenerateRequest, GenerateResponse},
+    abi::completion::generate::{GenerateRequest, GenerateResponse},
     client::{Action, ollama::OllamaClient},
 };
 

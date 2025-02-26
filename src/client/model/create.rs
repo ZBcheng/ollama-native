@@ -2,7 +2,7 @@ use std::{collections::HashMap, marker::PhantomData, sync::Arc};
 
 use crate::abi::{
     Message,
-    create_model::{CreateModelRequest, CreateModelResponse},
+    model::create::{CreateModelRequest, CreateModelResponse},
 };
 use crate::client::{Action, ollama::OllamaClient};
 

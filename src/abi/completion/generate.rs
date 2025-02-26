@@ -4,11 +4,10 @@ use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    client::{OllamaRequest, OllamaResponse},
+    abi::Parameter,
+    client::{OllamaRequest, OllamaResponse, RequestMethod},
     error::OllamaError,
 };
-
-use super::Parameter;
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct GenerateRequest {
@@ -100,6 +99,10 @@ impl OllamaRequest for GenerateRequest {
         "/api/generate"
     }
 
+    fn method(&self) -> RequestMethod {
+        RequestMethod::POST
+    }
+
     #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), OllamaError> {
         self.stream = true;
@@ -110,8 +113,7 @@ impl OllamaRequest for GenerateRequest {
 #[async_trait]
 impl OllamaResponse for GenerateResponse {
     async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
-        let content = response;
-        let content = content
+        let content = response
             .json()
             .await
             .map_err(|e| OllamaError::DecodingError(e))?;

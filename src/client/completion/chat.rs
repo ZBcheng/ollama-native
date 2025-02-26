@@ -2,7 +2,7 @@ use std::{marker::PhantomData, sync::Arc};
 
 use crate::abi::{
     Message,
-    chat::{ChatRequest, ChatResponse, Format, Tool},
+    completion::chat::{ChatRequest, ChatResponse, Format, Tool},
 };
 use crate::client::{Action, ollama::OllamaClient};
 
