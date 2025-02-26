@@ -34,7 +34,7 @@ pub struct Action<Request: OllamaRequest, Response: OllamaResponse> {
 
 impl<Request, Response> IntoFuture for Action<Request, Response>
 where
-    Request: OllamaRequest + Debug,
+    Request: OllamaRequest,
     Response: OllamaResponse,
 {
     type Output = Result<Response, OllamaError>;
