@@ -123,6 +123,19 @@ impl Ollama {
             model,
         )
     }
+
+    /// Copy a model. Creates a model with another name from an existing model.
+    pub fn copy_model(
+        &self,
+        source: &str,
+        destination: &str,
+    ) -> Action<CopyModelRequest, CopyModelResponse> {
+        Action::<CopyModelRequest, CopyModelResponse>::new(
+            Arc::clone(&self.client),
+            source,
+            destination,
+        )
+    }
 }
 
 #[cfg(test)]
@@ -208,28 +221,28 @@ mod tests {
     #[ignore]
     async fn chat_with_tools_should_work() {
         let tool = r#"
-{
-    "type": "function",
-    "function": {
-        "name": "get_current_weather",
-        "description": "Get the current weather for a location",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "location": {
-                    "type": "string",
-                    "description": "The location to get the weather for, e.g. San Francisco, CA"
-                },
-                "format": {
-                    "type": "string",
-                    "description": "The format to return the weather in, e.g. 'celsius' or 'fahrenheit'",
-                    "enum": ["celsius", "fahrenheit"]
+        {
+            "type": "function",
+            "function": {
+                "name": "get_current_weather",
+                "description": "Get the current weather for a location",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "location": {
+                            "type": "string",
+                            "description": "The location to get the weather for, e.g. San Francisco, CA"
+                        },
+                        "format": {
+                            "type": "string",
+                            "description": "The format to return the weather in, e.g. 'celsius' or 'fahrenheit'",
+                            "enum": ["celsius", "fahrenheit"]
+                        }
+                    },
+                    "required": ["location", "format"]
                 }
-            },
-            "required": ["location", "format"]
-        }
-    }
-}"#;
+            }
+        }"#;
         let ollama: Ollama = Ollama::new(mock_config());
         let resp = ollama
             .chat("llama3.1:8b")
@@ -317,10 +330,34 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn list_local_models_should_work() {
         let ollama = Ollama::new(mock_config());
         let local_models = ollama.list_local_models().await.unwrap();
         println!("local_models: {local_models:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn copy_a_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let _ = ollama
+            .copy_model("llama3.1:8b", "llama3.1:another")
+            .await
+            .unwrap();
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn copy_a_model_does_not_exist_should_raise_error() {
+        let ollama = Ollama::new(mock_config());
+        let err = ollama
+            .copy_model("llama3.9:18b", "llama3.1:another")
+            .await
+            .err()
+            .unwrap();
+
+        assert_eq!(err.to_string(), "model doesn't exist");
     }
 
     fn mock_config() -> OllamaConfig {
