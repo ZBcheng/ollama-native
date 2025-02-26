@@ -8,7 +8,7 @@ use crate::error::OllamaError;
 pub struct ListLocalModelsRequest {}
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct ListLocalModelResponse {
+pub struct ListLocalModelsResponse {
     pub models: Vec<ModelInfo>,
 }
 
@@ -46,7 +46,7 @@ impl OllamaRequest for ListLocalModelsRequest {
 }
 
 #[async_trait]
-impl OllamaResponse for ListLocalModelResponse {
+impl OllamaResponse for ListLocalModelsResponse {
     async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
         let content = response
             .json()

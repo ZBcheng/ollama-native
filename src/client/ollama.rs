@@ -13,7 +13,7 @@ use crate::abi::completion::{
 #[cfg(feature = "model")]
 use crate::abi::model::{
     create::{CreateModelRequest, CreateModelResponse},
-    list_local::{ListLocalModelResponse, ListLocalModelsRequest},
+    list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
 };
 
 use super::{Action, OllamaRequest, RequestMethod};
@@ -107,8 +107,8 @@ impl Ollama {
     }
 
     /// List models that are available locally.
-    pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelResponse> {
-        Action::<ListLocalModelsRequest, ListLocalModelResponse>::new(Arc::clone(&self.client))
+    pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
+        Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(Arc::clone(&self.client))
     }
 }
 
@@ -294,6 +294,13 @@ mod tests {
 
         out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn list_local_models_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let local_models = ollama.list_local_models().await.unwrap();
+        println!("local_models: {local_models:?}");
     }
 
     fn mock_config() -> OllamaConfig {
