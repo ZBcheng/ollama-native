@@ -81,11 +81,19 @@ impl<Request: OllamaRequest + Debug, Response: OllamaResponse> Action<Request, R
     }
 }
 
+#[async_trait]
 pub trait OllamaRequest: Serialize + Send + Sync + 'static {
     fn path(&self) -> &str;
 
+    fn method(&self) -> RequestMethod;
+
     #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), OllamaError>;
+}
+
+pub enum RequestMethod {
+    POST,
+    GET,
 }
 
 #[async_trait]

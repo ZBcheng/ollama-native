@@ -1,4 +1,9 @@
-use std::{fmt::Debug, sync::Arc};
+use std::sync::Arc;
+
+use serde::Serialize;
+
+use crate::config::OllamaConfig;
+use crate::error::OllamaError;
 
 use crate::abi::{
     chat::{ChatRequest, ChatResponse},
@@ -23,18 +28,29 @@ impl OllamaClient {
         Self { cli, config }
     }
 
-    pub async fn post<T: OllamaRequest + Debug>(
+    pub async fn request<T: OllamaRequest>(
         &self,
         path: &str,
         data: &T,
     ) -> Result<reqwest::Response, OllamaError> {
-        let url = format!("{}{}", self.config.url, path);
+        let url = format!("{}{}", self.config.url, data.path());
+        match data.method() {
+            RequestMethod::GET => self.get(&url).await,
+            RequestMethod::POST => self.post(&url, data).await,
+        }
+    }
+
+    async fn post(
+        &self,
+        url: &str,
+        data: &impl Serialize,
+    ) -> Result<reqwest::Response, OllamaError> {
         let serialized =
             serde_json::to_vec(data).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
 
         let response = self
             .cli
-            .post(&url)
+            .post(url)
             .body(serialized)
             .send()
             .await
@@ -42,8 +58,7 @@ impl OllamaClient {
         Ok(response)
     }
 
-    pub async fn get(&self, path: &str) -> Result<reqwest::Response, OllamaError> {
-        let url = format!("{}{}", self.config.url, path);
+    async fn get(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
         let response = self
             .cli
             .get(url)
