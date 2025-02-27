@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
 pub mod completion;
+pub mod version;
 
 #[cfg(feature = "model")]
 pub mod model;

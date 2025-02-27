@@ -1,23 +1,22 @@
-use std::sync::Arc;
-
 use serde::Serialize;
-
-use crate::abi::model::delete::{DeleteModelRequest, DeleteModelResponse};
-use crate::abi::model::pull::{PullModelRequest, PullModelResponse};
-use crate::abi::model::push::{PushModelRequest, PushModelResponse};
-use crate::config::OllamaConfig;
-use crate::error::OllamaError;
+use std::sync::Arc;
 
 use crate::abi::completion::{
     chat::{ChatRequest, ChatResponse},
     generate::{GenerateRequest, GenerateResponse},
 };
+use crate::abi::version::version::{VersionRequest, VersionResponse};
+use crate::config::OllamaConfig;
+use crate::error::OllamaError;
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
     copy::{CopyModelRequest, CopyModelResponse},
     create::{CreateModelRequest, CreateModelResponse},
+    delete::{DeleteModelRequest, DeleteModelResponse},
     list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
+    pull::{PullModelRequest, PullModelResponse},
+    push::{PushModelRequest, PushModelResponse},
     show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
 };
 
@@ -97,6 +96,7 @@ pub struct Ollama {
     client: Arc<OllamaClient>,
 }
 
+// Default feature
 impl Ollama {
     pub fn new(config: OllamaConfig) -> Self {
         let client = Arc::new(OllamaClient::new(config));
@@ -114,6 +114,11 @@ impl Ollama {
     /// additional data from the request.
     pub fn chat(&self, model: &str) -> Action<ChatRequest, ChatResponse> {
         Action::<ChatRequest, ChatResponse>::new(Arc::clone(&self.client), model)
+    }
+
+    /// Retrieve the Ollama version.
+    pub fn version(&self) -> Action<VersionRequest, VersionResponse> {
+        Action::<VersionRequest, VersionResponse>::new(Arc::clone(&self.client))
     }
 }
 
@@ -460,6 +465,14 @@ mod tests {
 
         out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn version_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let version = ollama.version().await.unwrap();
+        println!("version: {version:?}");
     }
 
     fn mock_config() -> OllamaConfig {
