@@ -39,6 +39,7 @@ impl OllamaClient {
         match data.method() {
             RequestMethod::GET => self.get(&url).await,
             RequestMethod::POST => self.post(&url, data).await,
+            RequestMethod::DELETE => self.delete(&url, data).await,
         }
     }
 
@@ -64,6 +65,24 @@ impl OllamaClient {
         let response = self
             .cli
             .get(url)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(response)
+    }
+
+    async fn delete(
+        &self,
+        url: &str,
+        data: &impl Serialize,
+    ) -> Result<reqwest::Response, OllamaError> {
+        let serialized =
+            serde_json::to_vec(data).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
+
+        let response = self
+            .cli
+            .delete(url)
+            .body(serialized)
             .send()
             .await
             .map_err(|e| OllamaError::RequestError(e))?;
