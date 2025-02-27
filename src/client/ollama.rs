@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use serde::Serialize;
 
+use crate::abi::model::delete::{DeleteModelRequest, DeleteModelResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -154,6 +155,11 @@ impl Ollama {
             source,
             destination,
         )
+    }
+
+    /// Delete a model and its data.
+    pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
+        Action::<DeleteModelRequest, DeleteModelResponse>::new(Arc::clone(&self.client), model)
     }
 }
 
@@ -376,7 +382,27 @@ mod tests {
             .err()
             .unwrap();
 
-        assert_eq!(err.to_string(), "model doesn't exist");
+        assert_eq!(err.to_string(), "model does not exist");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn delete_a_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let _ = ollama.delete_model("yuanshen:latest").await.unwrap();
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn delete_a_model_does_not_exist_should_raise_error() {
+        let ollama = Ollama::new(mock_config());
+        let err = ollama
+            .delete_model("a_model_does_not_exist")
+            .await
+            .err()
+            .unwrap();
+
+        assert_eq!(err.to_string(), "model does not exist")
     }
 
     fn mock_config() -> OllamaConfig {

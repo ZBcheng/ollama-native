@@ -17,7 +17,7 @@ pub enum OllamaError {
     #[error("invalid format: {0}")]
     InvalidFormat(String),
 
-    #[error("model doesn't exist")]
+    #[error("model does not exist")]
     ModelDoesNotExist,
 
     #[error("unknown error: {0}")]
