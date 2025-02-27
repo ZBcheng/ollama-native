@@ -4,6 +4,7 @@ use serde::Serialize;
 
 use crate::abi::model::delete::{DeleteModelRequest, DeleteModelResponse};
 use crate::abi::model::pull::{PullModelRequest, PullModelResponse};
+use crate::abi::model::push::{PushModelRequest, PushModelResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -167,6 +168,11 @@ impl Ollama {
     /// from where they left off, and multiple calls will share the same download progress.
     pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
         Action::<PullModelRequest, PullModelResponse>::new(Arc::clone(&self.client), model)
+    }
+
+    /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
+    pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
+        Action::<PushModelRequest, PushModelResponse>::new(Arc::clone(&self.client), model)
     }
 }
 
@@ -417,6 +423,30 @@ mod tests {
     async fn pull_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
         let mut s = ollama.pull_model("llama3.2:1b").stream().await.unwrap();
+
+        let mut out = stdout();
+        while let Some(item) = s.next().await {
+            let item = item.unwrap();
+            let serialized = serde_json::to_string(&item).unwrap();
+            out.write(format!("{}\n", serialized).as_bytes())
+                .await
+                .unwrap();
+            out.flush().await.unwrap();
+        }
+
+        out.write(b"\n").await.unwrap();
+        out.flush().await.unwrap();
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn push_a_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let mut s = ollama
+            .push_model("mattw/pygmalion:latest")
+            .stream()
+            .await
+            .unwrap();
 
         let mut out = stdout();
         while let Some(item) = s.next().await {
