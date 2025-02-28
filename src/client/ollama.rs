@@ -45,6 +45,7 @@ impl OllamaClient {
             RequestMethod::GET => self.get(&url).await,
             RequestMethod::POST => self.post(&url, data).await,
             RequestMethod::DELETE => self.delete(&url, data).await,
+            RequestMethod::HEAD => self.head(&url).await,
         }
     }
 
@@ -92,6 +93,16 @@ impl OllamaClient {
             .await
             .map_err(|e| OllamaError::RequestError(e))?;
         Ok(response)
+    }
+
+    async fn head(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
+        let resposne = self
+            .cli
+            .head(url)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(resposne)
     }
 }
 
