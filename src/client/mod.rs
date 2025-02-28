@@ -84,6 +84,7 @@ pub enum RequestMethod {
     POST,
     GET,
     DELETE,
+    HEAD,
 }
 
 #[async_trait]

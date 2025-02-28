@@ -20,6 +20,9 @@ pub enum OllamaError {
     #[error("model does not exist")]
     ModelDoesNotExist,
 
+    #[error("blob does not exist")]
+    BlobDoesNotExist,
+
     #[error("unknown error: {0}")]
     UnknownError(String),
 }

@@ -1,11 +1,14 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::completion::{
-    chat::{ChatRequest, ChatResponse},
-    generate::{GenerateRequest, GenerateResponse},
-};
 use crate::abi::version::version::{VersionRequest, VersionResponse};
+use crate::abi::{
+    completion::{
+        chat::{ChatRequest, ChatResponse},
+        generate::{GenerateRequest, GenerateResponse},
+    },
+    model::check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
+};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -222,6 +225,25 @@ impl Ollama {
         Action::<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse>::new(
             Arc::clone(&self.client),
             model,
+        )
+    }
+
+    /// Ensures that the file blob (Binary Large Object) used with create a model exists on the server.
+    /// This checks your Ollama server and not ollama.com.
+    ///
+    /// # Parameters
+    /// - `digest`: The SHA256 digest of the blob.
+    ///
+    /// # Returns
+    /// - `Ok(CheckBlobExistsResponse {})` if blob exists.
+    /// - `Err(OllamaError::BlobDoesNotExist)` if blob does not exist.
+    pub fn check_blob_exists(
+        &self,
+        digest: &str,
+    ) -> Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
+        Action::<CheckBlobExistsRequest, CheckBlobExistsResponse>::new(
+            Arc::clone(&self.client),
+            digest,
         )
     }
 }
@@ -551,6 +573,19 @@ mod tests {
             .await
             .unwrap();
         println!("{resp:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn check_blob_exists_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama
+            .check_blob_exists(
+                "sha256:29fdb92e57cf0827ded04ae6461b5931d01fa595843f55d36f5b275a52087dd2",
+            )
+            .await;
+
+        assert_eq!(resp.err().unwrap().to_string(), "blob does not exist");
     }
 
     fn mock_config() -> OllamaConfig {

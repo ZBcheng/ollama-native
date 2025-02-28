@@ -1,3 +1,4 @@
+pub mod check_blob_exists;
 pub mod copy;
 pub mod create;
 pub mod delete;
