@@ -23,6 +23,7 @@ impl OllamaRequest for VersionRequest {
         RequestMethod::GET
     }
 
+    #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), OllamaError> {
         Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
