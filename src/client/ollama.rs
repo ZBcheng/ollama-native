@@ -1,11 +1,14 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::completion::{
-    chat::{ChatRequest, ChatResponse},
-    generate::{GenerateRequest, GenerateResponse},
-};
 use crate::abi::version::version::{VersionRequest, VersionResponse};
+use crate::abi::{
+    completion::{
+        chat::{ChatRequest, ChatResponse},
+        generate::{GenerateRequest, GenerateResponse},
+    },
+    model::push_blob::{PushBlobRequest, PushBlobResponse},
+};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -278,7 +281,18 @@ impl Ollama {
         )
     }
 
-    // pub fn push_blob
+    /// Push a file to the Ollama server to create a "blob" (Binary Large Object).
+    ///
+    /// # Parameters
+    /// - `file`: The file you want to push.
+    /// - `digest`: The expected SHA256 digest of the file.
+    ///
+    /// # Returns
+    /// - `Ok(PushBlobRequest {})` if the blob was successfully created.
+    /// - `Err(OllamaError::UnexpectedDigest)` if the digest used is not expected.
+    pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
+        Action::<PushBlobRequest, PushBlobResponse>::new(Arc::clone(&self.client), file, digest)
+    }
 }
 
 #[cfg(test)]

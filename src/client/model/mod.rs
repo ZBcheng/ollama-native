@@ -8,4 +8,5 @@ pub mod list_local;
 pub mod list_running;
 pub mod pull;
 pub mod push;
+pub mod push_blob;
 pub mod show_info;
