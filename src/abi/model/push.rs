@@ -54,7 +54,6 @@ impl OllamaResponse for PushModelResponse {
 
     #[cfg(feature = "stream")]
     async fn parse_chunk(chunk: bytes::Bytes) -> Result<Self, OllamaError> {
-        println!("chunk: {chunk:?}");
         match serde_json::from_slice(&chunk) {
             Ok(r) => Ok(r),
             Err(e) => Err(OllamaError::StreamDecodingError(e)),
