@@ -1,6 +1,7 @@
 use serde::Serialize;
 use std::sync::Arc;
 
+use crate::abi::model::list_running::{ListRunningModelsRequest, ListRunningModelsResponse};
 use crate::abi::version::version::{VersionRequest, VersionResponse};
 use crate::abi::{
     completion::{
@@ -141,6 +142,13 @@ impl Ollama {
     /// List models that are available locally.
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
         Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(Arc::clone(&self.client))
+    }
+
+    /// List models that are currently loaded into memory.
+    pub fn list_running_models(
+        &self,
+    ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
+        Action::<ListRunningModelsRequest, ListRunningModelsResponse>::new(Arc::clone(&self.client))
     }
 
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
@@ -499,6 +507,14 @@ mod tests {
             .generate_embedding("llama3.2:1b", "Here is an article about llamas...")
             .await
             .unwrap();
+        println!("{resp:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn list_running_models_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama.list_running_models().await.unwrap();
         println!("{resp:?}");
     }
 
