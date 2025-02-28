@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
