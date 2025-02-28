@@ -1,8 +1,6 @@
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use crate::client::{OllamaRequest, OllamaResponse, RequestMethod};
-use crate::error::OllamaError;
+use crate::client::OllamaRequest;
 
 use super::ModelInfoDetail;
 
@@ -31,30 +29,5 @@ pub struct ListRunningModelsInfo {
 impl OllamaRequest for ListRunningModelsRequest {
     fn path(&self) -> String {
         "/api/ps".to_string()
-    }
-
-    fn method(&self) -> RequestMethod {
-        RequestMethod::Get
-    }
-
-    #[cfg(feature = "stream")]
-    fn set_stream(&mut self) -> Result<(), OllamaError> {
-        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
-    }
-}
-
-#[async_trait]
-impl OllamaResponse for ListRunningModelsResponse {
-    async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
-        let content = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::DecodingError(e))?;
-        Ok(content)
-    }
-
-    #[cfg(feature = "stream")]
-    async fn parse_chunk(_: bytes::Bytes) -> Result<Self, OllamaError> {
-        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
 }

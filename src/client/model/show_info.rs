@@ -1,8 +1,11 @@
 use std::{marker::PhantomData, sync::Arc};
 
+use futures::future::BoxFuture;
+
 use crate::{
     abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
-    client::{Action, ollama::OllamaClient},
+    client::{Action, OllamaRequest, ollama::OllamaClient},
+    error::OllamaError,
 };
 
 impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
@@ -23,5 +26,22 @@ impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
     pub fn verbose(mut self) -> Self {
         self.request.verbose = Some(true);
         self
+    }
+}
+
+impl IntoFuture for Action<ShowModelInformationRequest, ShowModelInformationResponse> {
+    type Output = Result<ShowModelInformationResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'static, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let url = format!("{}{}", self.ollama.url(), self.request.path());
+            let reqwest_resp = self.ollama.post(&url, &self.request).await?;
+            let response = reqwest_resp
+                .json()
+                .await
+                .map_err(|e| OllamaError::DecodingError(e))?;
+            Ok(response)
+        })
     }
 }

@@ -9,7 +9,7 @@ pub enum OllamaError {
     DecodingError(reqwest::Error),
 
     #[error("stream decoding error: {0}")]
-    StreamDecodingError(serde_json::Error),
+    StreamDecodingError(String),
 
     #[error("feature not available: {0}")]
     FeatureNotAvailable(String),

@@ -1,13 +1,8 @@
 use std::fmt::Debug;
 
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    abi::Parameter,
-    client::{OllamaRequest, OllamaResponse, RequestMethod},
-    error::OllamaError,
-};
+use crate::{abi::Parameter, client::OllamaRequest};
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct GenerateRequest {
@@ -97,34 +92,5 @@ pub struct GenerateResponse {
 impl OllamaRequest for GenerateRequest {
     fn path(&self) -> String {
         "/api/generate".to_string()
-    }
-
-    fn method(&self) -> RequestMethod {
-        RequestMethod::Post
-    }
-
-    #[cfg(feature = "stream")]
-    fn set_stream(&mut self) -> Result<(), OllamaError> {
-        self.stream = true;
-        Ok(())
-    }
-}
-
-#[async_trait]
-impl OllamaResponse for GenerateResponse {
-    async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
-        let content = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::DecodingError(e))?;
-        Ok(content)
-    }
-
-    #[cfg(feature = "stream")]
-    async fn parse_chunk(chunk: bytes::Bytes) -> Result<Self, OllamaError> {
-        match serde_json::from_slice(&chunk) {
-            Ok(r) => Ok(r),
-            Err(e) => Err(OllamaError::StreamDecodingError(e)),
-        }
     }
 }

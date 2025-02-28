@@ -6,6 +6,15 @@ use crate::abi::{
 };
 use crate::client::{Action, ollama::OllamaClient};
 
+#[cfg(feature = "stream")]
+use {
+    crate::client::{IntoStream, OllamaRequest, OllamaStream},
+    crate::error::OllamaError,
+    async_stream::stream,
+    async_trait::async_trait,
+    tokio_stream::StreamExt,
+};
+
 impl Action<CreateModelRequest, CreateModelResponse> {
     pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
         let request = CreateModelRequest {
@@ -217,4 +226,54 @@ impl Action<CreateModelRequest, CreateModelResponse> {
         self.request.parameters.min_p(min_p);
         self
     }
+}
+
+#[cfg(feature = "stream")]
+#[async_trait]
+impl IntoStream<CreateModelResponse> for Action<CreateModelRequest, CreateModelResponse> {
+    async fn stream(mut self) -> Result<OllamaStream<CreateModelResponse>, OllamaError> {
+        self.request.stream = true;
+
+        let url = format!("{}{}", self.ollama.url(), self.request.path());
+        let mut reqwest_stream = self.ollama.post(&url, &self.request).await?.bytes_stream();
+
+        let s = stream! {
+            while let Some(stream_item) = reqwest_stream.next().await {
+                match stream_item {
+                    Ok(chunks) => match parse_chunks(&chunks) {
+                        Ok(r) => for c in r {
+                            yield Ok(c)
+                        },
+                        Err(e) => yield Err(e.into()),
+                    }
+                    Err(e) => yield Err(OllamaError::DecodingError(e.into()))
+                }
+
+            };
+        };
+
+        Ok(Box::pin(s))
+    }
+}
+
+#[cfg(feature = "stream")]
+fn parse_chunks(chunks: &[u8]) -> Result<Vec<CreateModelResponse>, OllamaError> {
+    let chunks = str::from_utf8(&chunks).map_err(|e| {
+        OllamaError::StreamDecodingError(format!("failed to parse chunk to utf8: {e}"))
+    })?;
+
+    let splitted: Vec<&str> = chunks.trim().split('\n').collect();
+
+    let mut resp = vec![];
+
+    for sp in splitted {
+        let deserialized: CreateModelResponse = serde_json::from_str(sp).map_err(|e| {
+            OllamaError::StreamDecodingError(format!(
+                "failed to deserialize PullModelResponse from {sp}: {e}",
+            ))
+        })?;
+        resp.push(deserialized);
+    }
+
+    Ok(resp)
 }

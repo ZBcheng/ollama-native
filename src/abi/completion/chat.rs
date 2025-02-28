@@ -1,10 +1,8 @@
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
     abi::{Message, Parameter, Role},
-    client::{OllamaRequest, OllamaResponse, RequestMethod},
-    error::OllamaError,
+    client::OllamaRequest,
 };
 
 #[derive(Debug, Clone, Default, Serialize)]
@@ -39,7 +37,7 @@ pub struct ChatRequest {
     pub keep_alive: Option<i64>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ChatResponse {
     /// The model name.
     pub model: String,
@@ -129,37 +127,5 @@ impl Serialize for Format {
 impl OllamaRequest for ChatRequest {
     fn path(&self) -> String {
         "/api/chat".to_string()
-    }
-
-    fn method(&self) -> RequestMethod {
-        RequestMethod::Post
-    }
-
-    #[cfg(feature = "stream")]
-    fn set_stream(&mut self) -> Result<(), OllamaError> {
-        if self.tools.len() > 0 {
-            return Err(OllamaError::FeatureNotAvailable(String::from("stream")));
-        }
-        self.stream = true;
-        Ok(())
-    }
-}
-
-#[async_trait]
-impl OllamaResponse for ChatResponse {
-    async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
-        let content = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::DecodingError(e))?;
-        Ok(content)
-    }
-
-    #[cfg(feature = "stream")]
-    async fn parse_chunk(chunk: bytes::Bytes) -> Result<Self, OllamaError> {
-        match serde_json::from_slice(&chunk) {
-            Ok(r) => Ok(r),
-            Err(e) => Err(OllamaError::StreamDecodingError(e)),
-        }
     }
 }

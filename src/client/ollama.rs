@@ -1,16 +1,15 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::version::version::{VersionRequest, VersionResponse};
-use crate::abi::{
-    completion::{
-        chat::{ChatRequest, ChatResponse},
-        generate::{GenerateRequest, GenerateResponse},
-    },
-    model::push_blob::{PushBlobRequest, PushBlobResponse},
+use crate::abi::completion::{
+    chat::{ChatRequest, ChatResponse},
+    generate::{GenerateRequest, GenerateResponse},
 };
+use crate::abi::version::{VersionRequest, VersionResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
+
+use super::Action;
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
@@ -24,13 +23,12 @@ use crate::abi::model::{
     list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
     pull::{PullModelRequest, PullModelResponse},
     push::{PushModelRequest, PushModelResponse},
+    push_blob::{PushBlobRequest, PushBlobResponse},
     show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
 };
 
-use super::{Action, OllamaRequest, RequestMethod};
-
 pub struct OllamaClient {
-    cli: reqwest::Client,
+    pub cli: reqwest::Client,
     config: OllamaConfig,
 }
 
@@ -40,27 +38,11 @@ impl OllamaClient {
         Self { cli, config }
     }
 
-    pub async fn request<T: OllamaRequest>(
-        &self,
-        data: &T,
-    ) -> Result<reqwest::Response, OllamaError> {
-        let url = format!("{}{}", self.config.url, data.path());
-        match data.method() {
-            RequestMethod::Get => self.get(&url).await,
-            RequestMethod::Post => self.post(&url, data).await,
-
-            #[cfg(feature = "model")]
-            RequestMethod::Delete => self.delete(&url, data).await,
-
-            #[cfg(feature = "model")]
-            RequestMethod::Head => self.head(&url).await,
-
-            #[cfg(feature = "model")]
-            RequestMethod::PostFile(file_path) => self.post_file(&url, &file_path).await,
-        }
+    pub fn url(&self) -> String {
+        self.config.url.to_string()
     }
 
-    async fn post(
+    pub async fn post(
         &self,
         url: &str,
         data: &impl Serialize,
@@ -78,7 +60,7 @@ impl OllamaClient {
         Ok(response)
     }
 
-    async fn get(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
+    pub async fn get(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
         let response = self
             .cli
             .get(url)
@@ -86,60 +68,6 @@ impl OllamaClient {
             .await
             .map_err(|e| OllamaError::RequestError(e))?;
         Ok(response)
-    }
-
-    #[cfg(feature = "model")]
-    async fn post_file(
-        &self,
-        url: &str,
-        file_path: &str,
-    ) -> Result<reqwest::Response, OllamaError> {
-        let file = tokio::fs::File::open(file_path)
-            .await
-            .map_err(|e| OllamaError::FileError(e))?;
-
-        use tokio_util::codec::{BytesCodec, FramedRead};
-        let stream = FramedRead::new(file, BytesCodec::new());
-        let body = reqwest::Body::wrap_stream(stream);
-
-        let response = self
-            .cli
-            .post(url)
-            .body(body)
-            .send()
-            .await
-            .map_err(|e| OllamaError::RequestError(e))?;
-        Ok(response)
-    }
-
-    #[cfg(feature = "model")]
-    async fn delete(
-        &self,
-        url: &str,
-        data: &impl Serialize,
-    ) -> Result<reqwest::Response, OllamaError> {
-        let serialized =
-            serde_json::to_vec(data).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
-
-        let response = self
-            .cli
-            .delete(url)
-            .body(serialized)
-            .send()
-            .await
-            .map_err(|e| OllamaError::RequestError(e))?;
-        Ok(response)
-    }
-
-    #[cfg(feature = "model")]
-    async fn head(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
-        let resposne = self
-            .cli
-            .head(url)
-            .send()
-            .await
-            .map_err(|e| OllamaError::RequestError(e))?;
-        Ok(resposne)
     }
 }
 
@@ -298,10 +226,15 @@ impl Ollama {
 #[cfg(test)]
 mod tests {
 
+    use serde::Serialize;
     use tokio::io::{AsyncWriteExt, stdout};
     use tokio_stream::StreamExt;
 
-    use crate::{abi::Message, client::ollama::Ollama, config::OllamaConfig};
+    use crate::{
+        abi::Message,
+        client::{IntoStream, OllamaStream, ollama::Ollama},
+        config::OllamaConfig,
+    };
 
     #[tokio::test]
     #[ignore]
@@ -335,13 +268,42 @@ mod tests {
     #[ignore]
     async fn chat_should_work() {
         let ollama = Ollama::new(mock_config());
+        let weather_tool = r#"{"type": "function","function": {"name": "get_current_weather","description": "Get the current weather for a location"}}"#;
+        let jokel_tool = r#"{"type": "function","function": {"name": "tell_joke","description": "Tell a joke about a topic given by user"}}"#;
+
         let resp = ollama
             .chat("llama3.1:8b")
             .system_message("You are an expert on sharks")
-            .user_message("Who are you?")
+            .user_message("Tell me a joke about sharks?")
+            .tool(&weather_tool)
+            .tool(&jokel_tool)
             .await
             .unwrap();
         println!("{:?}", resp);
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn chat_stream_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let mut s = ollama
+            .chat("llama3.2:1b")
+            .system_message("You are an expiret on sharks")
+            .user_message("Who are you")
+            .stream()
+            .await
+            .unwrap();
+
+        let mut out = stdout();
+        while let Some(item) = s.next().await {
+            out.write(item.unwrap().message.unwrap().content.as_bytes())
+                .await
+                .unwrap();
+            out.flush().await.unwrap();
+        }
+
+        out.write(b"\n").await.unwrap();
+        out.flush().await.unwrap();
     }
 
     #[tokio::test]
@@ -421,62 +383,52 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn chat_stream_with_tools_should_raise_error() {
-        let tool_desc = r#"{"type": "function","function": {"name": "get_current_weather","description": "Get the current weather for a location"}}"#;
+    #[ignore]
+    async fn pull_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
-        let s = ollama
-            .chat("llama3.1:8b")
-            .user_message("Tell me a joke about sharks")
-            .tool(&tool_desc)
-            .stream()
-            .await;
+        let stream = ollama.pull_model("llama3.2").stream().await.unwrap();
+        print_stream(stream).await;
+    }
 
-        let e = s.err().unwrap().to_string();
-        assert_eq!(e, "feature not available: stream");
+    #[tokio::test]
+    #[ignore]
+    async fn push_a_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let stream = ollama
+            .push_model("mattw/pygmalion:latest")
+            .stream()
+            .await
+            .unwrap();
+
+        print_stream(stream).await;
     }
 
     #[tokio::test]
     #[ignore]
     async fn create_model_should_work() {
-        let ollama = Ollama::new(mock_config());
-        let resp = ollama
-            .create_model("yuanshen")
-            .from("llama3.1:8b")
-            .system("You are a model who is good at playing Yuanshen")
-            .await
-            .unwrap();
+        // let ollama = Ollama::new(mock_config());
+        // let resp = ollama
+        //     .create_model("yuanshen")
+        //     .from("llama3.1:8b")
+        //     .system("You are a model who is good at playing Yuanshen")
+        //     .await
+        //     .unwrap();
 
-        println!("resp: {resp:?}");
+        // println!("resp: {resp:?}");
     }
 
     #[tokio::test]
     #[ignore]
     async fn create_model_with_stream_should_work() {
         let ollama = Ollama::new(mock_config());
-        let mut resp = ollama
-            .create_model("yuanshen")
-            .from("llama3.1:8b")
+        let stream = ollama
+            .create_model("yuanshsdf")
+            .from("llama3.2:1b")
             .system("You are a model who is good at playing Yuanshen")
             .stream()
             .await
             .unwrap();
-
-        let mut out = stdout();
-        out.write(b"xxxxxxxx\n").await.unwrap();
-        out.flush().await.unwrap();
-
-        while let Some(item) = resp.next().await {
-            match item {
-                Ok(item) => {
-                    out.write(item.status.as_bytes()).await.unwrap();
-                    out.flush().await.unwrap();
-                }
-                Err(e) => panic!("{}", e),
-            }
-        }
-
-        out.write(b"\n").await.unwrap();
-        out.flush().await.unwrap();
+        print_stream(stream).await;
     }
 
     #[tokio::test]
@@ -492,6 +444,14 @@ mod tests {
         let ollama = Ollama::new(mock_config());
         let local_models = ollama.list_local_models().await.unwrap();
         println!("local_models: {local_models:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn list_running_models_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama.list_running_models().await.unwrap();
+        println!("{resp:?}");
     }
 
     #[tokio::test]
@@ -521,7 +481,7 @@ mod tests {
     #[ignore]
     async fn delete_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
-        let _ = ollama.delete_model("yuanshen:latest").await.unwrap();
+        let _ = ollama.delete_model("yuanshsdf:latest").await.unwrap();
     }
 
     #[tokio::test]
@@ -533,52 +493,7 @@ mod tests {
             .await
             .err()
             .unwrap();
-
         assert_eq!(err.to_string(), "model does not exist")
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn pull_a_model_should_work() {
-        let ollama = Ollama::new(mock_config());
-        let mut s = ollama.pull_model("llama3.2:1b").stream().await.unwrap();
-
-        let mut out = stdout();
-        while let Some(item) = s.next().await {
-            let item = item.unwrap();
-            let serialized = serde_json::to_string(&item).unwrap();
-            out.write(format!("{}\n", serialized).as_bytes())
-                .await
-                .unwrap();
-            out.flush().await.unwrap();
-        }
-
-        out.write(b"\n").await.unwrap();
-        out.flush().await.unwrap();
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn push_a_model_should_work() {
-        let ollama = Ollama::new(mock_config());
-        let mut s = ollama
-            .push_model("mattw/pygmalion:latest")
-            .stream()
-            .await
-            .unwrap();
-
-        let mut out = stdout();
-        while let Some(item) = s.next().await {
-            let item = item.unwrap();
-            let serialized = serde_json::to_string(&item).unwrap();
-            out.write(format!("{}\n", serialized).as_bytes())
-                .await
-                .unwrap();
-            out.flush().await.unwrap();
-        }
-
-        out.write(b"\n").await.unwrap();
-        out.flush().await.unwrap();
     }
 
     #[tokio::test]
@@ -597,14 +512,6 @@ mod tests {
             .generate_embedding("llama3.2:1b", "Here is an article about llamas...")
             .await
             .unwrap();
-        println!("{resp:?}");
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn list_running_models_should_work() {
-        let ollama = Ollama::new(mock_config());
-        let resp = ollama.list_running_models().await.unwrap();
         println!("{resp:?}");
     }
 
@@ -635,7 +542,40 @@ mod tests {
         assert_eq!(resp.err().unwrap().to_string(), "blob does not exist");
     }
 
+    #[tokio::test]
+    async fn push_blob_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let _ = ollama.push_blob("xx", "digest:lxlkc").await;
+    }
+
     fn mock_config() -> OllamaConfig {
         OllamaConfig::from_url("http://localhost:11434")
     }
+
+    async fn print_stream<T: Serialize>(mut resp: OllamaStream<T>) {
+        let mut out = stdout();
+        out.flush().await.unwrap();
+
+        while let Some(item) = resp.next().await {
+            match item {
+                Ok(item) => {
+                    let serialized = serde_json::to_string(&item).unwrap();
+                    out.write(format!("{}\n", serialized).as_bytes())
+                        .await
+                        .unwrap();
+                    out.flush().await.unwrap();
+                }
+                Err(e) => panic!("{}", e),
+            }
+        }
+
+        out.write(b"\n").await.unwrap();
+        out.flush().await.unwrap();
+    }
 }
+//     }
+
+//     fn mock_config() -> OllamaConfig {
+//         OllamaConfig::from_url("http://localhost:11434")
+//     }
+// }

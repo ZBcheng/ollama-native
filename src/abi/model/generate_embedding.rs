@@ -1,11 +1,6 @@
-use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    abi::Parameter,
-    client::{OllamaRequest, OllamaResponse, RequestMethod},
-    error::OllamaError,
-};
+use crate::{abi::Parameter, client::OllamaRequest};
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
@@ -37,30 +32,5 @@ pub struct GenerateEmbeddingResponse {
 impl OllamaRequest for GenerateEmbeddingRequest {
     fn path(&self) -> String {
         "/api/embeddings".to_string()
-    }
-
-    fn method(&self) -> RequestMethod {
-        RequestMethod::Post
-    }
-
-    #[cfg(feature = "stream")]
-    fn set_stream(&mut self) -> Result<(), OllamaError> {
-        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
-    }
-}
-
-#[async_trait]
-impl OllamaResponse for GenerateEmbeddingResponse {
-    async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
-        let content = response
-            .json()
-            .await
-            .map_err(|e| OllamaError::DecodingError(e))?;
-        Ok(content)
-    }
-
-    #[cfg(feature = "stream")]
-    async fn parse_chunk(_: bytes::Bytes) -> Result<Self, OllamaError> {
-        Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
 }

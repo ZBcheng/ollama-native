@@ -1,10 +1,21 @@
 use std::{marker::PhantomData, sync::Arc};
 
+use futures::future::BoxFuture;
+
 use crate::abi::{
     Message,
     completion::chat::{ChatRequest, ChatResponse, Format, Tool},
 };
-use crate::client::{Action, ollama::OllamaClient};
+use crate::client::{Action, OllamaRequest, ollama::OllamaClient};
+use crate::error::OllamaError;
+
+#[cfg(feature = "stream")]
+use {
+    crate::client::{IntoStream, OllamaStream},
+    async_stream::stream,
+    async_trait::async_trait,
+    tokio_stream::StreamExt,
+};
 
 impl Action<ChatRequest, ChatResponse> {
     pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
@@ -181,5 +192,46 @@ impl Action<ChatRequest, ChatResponse> {
     pub fn min_p(mut self, min_p: f64) -> Self {
         self.request.options.min_p(min_p);
         self
+    }
+}
+
+impl IntoFuture for Action<ChatRequest, ChatResponse> {
+    type Output = Result<ChatResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'static, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let url = format!("{}{}", self.ollama.url(), self.request.path());
+            let reqwest_resp = self.ollama.post(&url, &self.request).await?;
+
+            let content = reqwest_resp
+                .json()
+                .await
+                .map_err(|e| OllamaError::DecodingError(e))?;
+            Ok(content)
+        })
+    }
+}
+
+#[cfg(feature = "stream")]
+#[async_trait]
+impl IntoStream<ChatResponse> for Action<ChatRequest, ChatResponse> {
+    async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
+        self.request.stream = true;
+
+        let url = format!("{}{}", self.ollama.url(), self.request.path());
+        let mut reqwest_stream = self.ollama.post(&url, &self.request).await?.bytes_stream();
+        let s = stream! {
+            while let Some(item) = reqwest_stream.next().await {
+                match item {
+                    Ok(chunk) => match serde_json::from_slice(&chunk) {
+                        Ok(r) => yield Ok(r),
+                        Err(e) => yield Err(OllamaError::StreamDecodingError(e.to_string())),
+                    }
+                    Err(e) => yield Err(OllamaError::DecodingError(e))
+                }
+            };
+        };
+        Ok(Box::pin(s))
     }
 }
