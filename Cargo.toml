@@ -14,10 +14,11 @@ reqwest = { version = "0.12.12", features = ["json"] }
 async-stream = { version = "0.3.6" }
 tokio = { version = "1.43.0", features = ["full"] }
 tokio-stream = { version = "0.1.17", features = ["full"], optional = true }
+tokio-util = { version = "0.7.13", optional = true }
 
 [features]
 stream = ["tokio-stream", "reqwest/stream"]
-model = ["reqwest/multipart"]
+model = ["reqwest/stream", "tokio-util"]
 
 [dev-dependencies]
 ollama-native = { path = ".", features = ["stream", "model"] }
