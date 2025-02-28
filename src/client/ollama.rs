@@ -1,19 +1,17 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::version::version::{VersionRequest, VersionResponse};
-use crate::abi::{
-    completion::{
-        chat::{ChatRequest, ChatResponse},
-        generate::{GenerateRequest, GenerateResponse},
-    },
-    model::check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
+use crate::abi::completion::{
+    chat::{ChatRequest, ChatResponse},
+    generate::{GenerateRequest, GenerateResponse},
 };
+use crate::abi::version::version::{VersionRequest, VersionResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
+    check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
     copy::{CopyModelRequest, CopyModelResponse},
     create::{CreateModelRequest, CreateModelResponse},
     delete::{DeleteModelRequest, DeleteModelResponse},
@@ -47,8 +45,15 @@ impl OllamaClient {
         match data.method() {
             RequestMethod::Get => self.get(&url).await,
             RequestMethod::Post => self.post(&url, data).await,
+
+            #[cfg(feature = "model")]
             RequestMethod::Delete => self.delete(&url, data).await,
+
+            #[cfg(feature = "model")]
             RequestMethod::Head => self.head(&url).await,
+
+            #[cfg(feature = "model")]
+            RequestMethod::PostFile(file_path) => self.post_file(&url, &file_path).await,
         }
     }
 
@@ -80,6 +85,31 @@ impl OllamaClient {
         Ok(response)
     }
 
+    #[cfg(feature = "model")]
+    async fn post_file(
+        &self,
+        url: &str,
+        file_path: &str,
+    ) -> Result<reqwest::Response, OllamaError> {
+        let file = tokio::fs::File::open(file_path)
+            .await
+            .map_err(|e| OllamaError::FileError(e))?;
+
+        use tokio_util::codec::{BytesCodec, FramedRead};
+        let stream = FramedRead::new(file, BytesCodec::new());
+        let body = reqwest::Body::wrap_stream(stream);
+
+        let response = self
+            .cli
+            .post(url)
+            .body(body)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(response)
+    }
+
+    #[cfg(feature = "model")]
     async fn delete(
         &self,
         url: &str,
@@ -98,6 +128,7 @@ impl OllamaClient {
         Ok(response)
     }
 
+    #[cfg(feature = "model")]
     async fn head(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
         let resposne = self
             .cli
@@ -246,6 +277,8 @@ impl Ollama {
             digest,
         )
     }
+
+    // pub fn push_blob
 }
 
 #[cfg(test)]

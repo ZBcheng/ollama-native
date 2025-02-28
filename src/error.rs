@@ -23,6 +23,12 @@ pub enum OllamaError {
     #[error("blob does not exist")]
     BlobDoesNotExist,
 
+    #[error("unexpected digest")]
+    UnexpectedDigest,
+
+    #[error("file error: {0}")]
+    FileError(std::io::Error),
+
     #[error("unknown error: {0}")]
     UnknownError(String),
 }

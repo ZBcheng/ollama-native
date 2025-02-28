@@ -83,8 +83,12 @@ pub trait OllamaRequest: Serialize + Send + Sync + 'static {
 pub enum RequestMethod {
     Post,
     Get,
+    #[cfg(feature = "model")]
     Delete,
+    #[cfg(feature = "model")]
     Head,
+    #[cfg(feature = "model")]
+    PostFile(String),
 }
 
 #[async_trait]
