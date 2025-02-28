@@ -81,10 +81,10 @@ pub trait OllamaRequest: Serialize + Send + Sync + 'static {
 }
 
 pub enum RequestMethod {
-    POST,
-    GET,
-    DELETE,
-    HEAD,
+    Post,
+    Get,
+    Delete,
+    Head,
 }
 
 #[async_trait]

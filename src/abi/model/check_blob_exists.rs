@@ -21,7 +21,7 @@ impl OllamaRequest for CheckBlobExistsRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::HEAD
+        RequestMethod::Head
     }
 
     #[cfg(feature = "stream")]

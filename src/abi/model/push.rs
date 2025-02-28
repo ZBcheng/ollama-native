@@ -35,7 +35,7 @@ impl OllamaRequest for PushModelRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

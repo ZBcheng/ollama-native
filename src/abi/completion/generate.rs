@@ -100,7 +100,7 @@ impl OllamaRequest for GenerateRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

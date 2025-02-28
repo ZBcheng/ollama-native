@@ -32,7 +32,7 @@ impl OllamaRequest for ListLocalModelsRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::GET
+        RequestMethod::Get
     }
 
     #[cfg(feature = "stream")]

@@ -38,7 +38,7 @@ impl OllamaRequest for ShowModelInformationRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

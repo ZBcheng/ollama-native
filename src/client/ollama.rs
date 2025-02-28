@@ -45,10 +45,10 @@ impl OllamaClient {
     ) -> Result<reqwest::Response, OllamaError> {
         let url = format!("{}{}", self.config.url, data.path());
         match data.method() {
-            RequestMethod::GET => self.get(&url).await,
-            RequestMethod::POST => self.post(&url, data).await,
-            RequestMethod::DELETE => self.delete(&url, data).await,
-            RequestMethod::HEAD => self.head(&url).await,
+            RequestMethod::Get => self.get(&url).await,
+            RequestMethod::Post => self.post(&url, data).await,
+            RequestMethod::Delete => self.delete(&url, data).await,
+            RequestMethod::Head => self.head(&url).await,
         }
     }
 

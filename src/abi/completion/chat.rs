@@ -132,7 +132,7 @@ impl OllamaRequest for ChatRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

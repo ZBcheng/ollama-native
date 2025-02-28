@@ -36,7 +36,7 @@ impl OllamaRequest for PullModelRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

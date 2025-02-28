@@ -49,7 +49,7 @@ impl OllamaRequest for GenerateEmbeddingsRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::POST
+        RequestMethod::Post
     }
 
     #[cfg(feature = "stream")]

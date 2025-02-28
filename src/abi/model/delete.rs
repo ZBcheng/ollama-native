@@ -24,7 +24,7 @@ impl OllamaRequest for DeleteModelRequest {
     }
 
     fn method(&self) -> RequestMethod {
-        RequestMethod::DELETE
+        RequestMethod::Delete
     }
 
     #[cfg(feature = "stream")]
