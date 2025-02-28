@@ -30,8 +30,8 @@ pub struct PushModelResponse {
 }
 
 impl OllamaRequest for PushModelRequest {
-    fn path(&self) -> &str {
-        "/api/push"
+    fn path(&self) -> String {
+        "/api/push".to_string()
     }
 
     fn method(&self) -> RequestMethod {

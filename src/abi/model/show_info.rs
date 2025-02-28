@@ -33,8 +33,8 @@ pub struct ShowModelInformationResponse {
 }
 
 impl OllamaRequest for ShowModelInformationRequest {
-    fn path(&self) -> &str {
-        "/api/show"
+    fn path(&self) -> String {
+        "/api/show".to_string()
     }
 
     fn method(&self) -> RequestMethod {

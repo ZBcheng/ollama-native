@@ -15,8 +15,8 @@ pub struct VersionResponse {
 }
 
 impl OllamaRequest for VersionRequest {
-    fn path(&self) -> &str {
-        "/api/version"
+    fn path(&self) -> String {
+        "/api/version".to_string()
     }
 
     fn method(&self) -> RequestMethod {

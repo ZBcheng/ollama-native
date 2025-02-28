@@ -31,8 +31,8 @@ pub struct PullModelResponse {
 }
 
 impl OllamaRequest for PullModelRequest {
-    fn path(&self) -> &str {
-        "/api/pull"
+    fn path(&self) -> String {
+        "/api/pull".to_string()
     }
 
     fn method(&self) -> RequestMethod {

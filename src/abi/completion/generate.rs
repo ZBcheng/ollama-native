@@ -95,8 +95,8 @@ pub struct GenerateResponse {
 }
 
 impl OllamaRequest for GenerateRequest {
-    fn path(&self) -> &str {
-        "/api/generate"
+    fn path(&self) -> String {
+        "/api/generate".to_string()
     }
 
     fn method(&self) -> RequestMethod {

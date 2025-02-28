@@ -65,8 +65,8 @@ pub struct CreateModelResponse {
 }
 
 impl OllamaRequest for CreateModelRequest {
-    fn path(&self) -> &str {
-        "/api/create"
+    fn path(&self) -> String {
+        "/api/create".to_string()
     }
 
     fn method(&self) -> RequestMethod {

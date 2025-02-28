@@ -29,8 +29,8 @@ pub struct ListRunningModelsInfo {
 }
 
 impl OllamaRequest for ListRunningModelsRequest {
-    fn path(&self) -> &str {
-        "/api/ps"
+    fn path(&self) -> String {
+        "/api/ps".to_string()
     }
 
     fn method(&self) -> RequestMethod {

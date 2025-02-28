@@ -72,7 +72,7 @@ impl<Request: OllamaRequest, Response: OllamaResponse> Action<Request, Response>
 
 #[async_trait]
 pub trait OllamaRequest: Serialize + Send + Sync + 'static {
-    fn path(&self) -> &str;
+    fn path(&self) -> String;
 
     fn method(&self) -> RequestMethod;
 

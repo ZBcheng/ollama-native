@@ -19,8 +19,8 @@ pub struct CopyModelRequest {
 pub struct CopyModelResponse {}
 
 impl OllamaRequest for CopyModelRequest {
-    fn path(&self) -> &str {
-        "/api/copy"
+    fn path(&self) -> String {
+        "/api/copy".to_string()
     }
 
     fn method(&self) -> RequestMethod {

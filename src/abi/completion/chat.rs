@@ -127,8 +127,8 @@ impl Serialize for Format {
 }
 
 impl OllamaRequest for ChatRequest {
-    fn path(&self) -> &str {
-        "/api/chat"
+    fn path(&self) -> String {
+        "/api/chat".to_string()
     }
 
     fn method(&self) -> RequestMethod {

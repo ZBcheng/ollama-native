@@ -44,8 +44,8 @@ pub struct GenerateEmbeddingsResponse {
 }
 
 impl OllamaRequest for GenerateEmbeddingsRequest {
-    fn path(&self) -> &str {
-        "/api/embed"
+    fn path(&self) -> String {
+        "/api/embed".to_string()
     }
 
     fn method(&self) -> RequestMethod {

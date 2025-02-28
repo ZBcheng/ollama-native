@@ -27,8 +27,8 @@ pub struct ModelInfo {
 }
 
 impl OllamaRequest for ListLocalModelsRequest {
-    fn path(&self) -> &str {
-        "/api/tags"
+    fn path(&self) -> String {
+        "/api/tags".to_string()
     }
 
     fn method(&self) -> RequestMethod {

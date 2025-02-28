@@ -19,8 +19,8 @@ pub struct DeleteModelRequest {
 pub struct DeleteModelResponse {}
 
 impl OllamaRequest for DeleteModelRequest {
-    fn path(&self) -> &str {
-        "/api/delete"
+    fn path(&self) -> String {
+        "/api/delete".to_string()
     }
 
     fn method(&self) -> RequestMethod {
@@ -41,7 +41,7 @@ impl OllamaResponse for DeleteModelResponse {
             StatusCode::OK => Ok(Self::default()),
             StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),
             other => Err(OllamaError::UnknownError(format!(
-                "/api/copy got unknown status code: {other}"
+                "/api/delete got unknown status code: {other}"
             ))),
         }
     }
