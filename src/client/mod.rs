@@ -19,8 +19,6 @@ pub struct Action<Request: OllamaRequest, Response> {
     pub _resp: PhantomData<Response>,
 }
 
-// }
-
 #[cfg(feature = "stream")]
 pub type OllamaStream<T> = Pin<Box<dyn Stream<Item = Result<T, OllamaError>>>>;
 
@@ -33,8 +31,3 @@ pub trait IntoStream<Response> {
 pub trait OllamaRequest: Serialize + Send + Sync + 'static {
     fn path(&self) -> String;
 }
-
-// #[async_trait]
-// pub trait OllamaResponse: DeserializeOwned + Send + Sync + 'static {
-//     async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError>;
-// }
