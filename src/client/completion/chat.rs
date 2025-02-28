@@ -6,7 +6,7 @@ use crate::abi::{
     Message,
     completion::chat::{ChatRequest, ChatResponse, Format, Tool},
 };
-use crate::client::{Action, OllamaRequest, ollama::OllamaClient};
+use crate::client::{Action, ollama::OllamaClient};
 use crate::error::OllamaError;
 
 #[cfg(feature = "stream")]
@@ -201,8 +201,7 @@ impl IntoFuture for Action<ChatRequest, ChatResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let url = format!("{}{}", self.ollama.url(), self.request.path());
-            let reqwest_resp = self.ollama.post(&url, &self.request).await?;
+            let reqwest_resp = self.ollama.post(&self.request).await?;
 
             let content = reqwest_resp
                 .json()
@@ -219,8 +218,8 @@ impl IntoStream<ChatResponse> for Action<ChatRequest, ChatResponse> {
     async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
         self.request.stream = true;
 
-        let url = format!("{}{}", self.ollama.url(), self.request.path());
-        let mut reqwest_stream = self.ollama.post(&url, &self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
+
         let s = stream! {
             while let Some(item) = reqwest_stream.next().await {
                 match item {

@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 
 use crate::{
     abi::model::list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
-    client::{Action, OllamaRequest, ollama::OllamaClient},
+    client::{Action, ollama::OllamaClient},
     error::OllamaError,
 };
 
@@ -24,8 +24,7 @@ impl IntoFuture for Action<ListLocalModelsRequest, ListLocalModelsResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let url = format!("{}{}", self.ollama.url(), self.request.path());
-            let reqwest_resp = self.ollama.get(&url).await?;
+            let reqwest_resp = self.ollama.get(&self.request).await?;
             let response = reqwest_resp
                 .json()
                 .await

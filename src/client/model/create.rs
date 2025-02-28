@@ -8,7 +8,7 @@ use crate::client::{Action, ollama::OllamaClient};
 
 #[cfg(feature = "stream")]
 use {
-    crate::client::{IntoStream, OllamaRequest, OllamaStream},
+    crate::client::{IntoStream, OllamaStream},
     crate::error::OllamaError,
     async_stream::stream,
     async_trait::async_trait,
@@ -234,8 +234,7 @@ impl IntoStream<CreateModelResponse> for Action<CreateModelRequest, CreateModelR
     async fn stream(mut self) -> Result<OllamaStream<CreateModelResponse>, OllamaError> {
         self.request.stream = true;
 
-        let url = format!("{}{}", self.ollama.url(), self.request.path());
-        let mut reqwest_stream = self.ollama.post(&url, &self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
 
         let s = stream! {
             while let Some(stream_item) = reqwest_stream.next().await {

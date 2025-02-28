@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 
 use crate::{
     abi::model::generate_embedding::{GenerateEmbeddingRequest, GenerateEmbeddingResponse},
-    client::{Action, OllamaRequest, ollama::OllamaClient},
+    client::{Action, ollama::OllamaClient},
     error::OllamaError,
 };
 
@@ -138,8 +138,7 @@ impl IntoFuture for Action<GenerateEmbeddingRequest, GenerateEmbeddingResponse> 
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let url = format!("{}{}", self.ollama.url(), self.request.path());
-            let reqwest_resp = self.ollama.post(&url, &self.request).await?;
+            let reqwest_resp = self.ollama.post(&self.request).await?;
             let response = reqwest_resp
                 .json()
                 .await

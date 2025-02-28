@@ -2,7 +2,7 @@ use std::{marker::PhantomData, sync::Arc};
 
 #[cfg(feature = "stream")]
 use {
-    crate::client::{IntoStream, OllamaRequest, OllamaStream},
+    crate::client::{IntoStream, OllamaStream},
     crate::error::OllamaError,
     async_stream::stream,
     async_trait::async_trait,
@@ -41,9 +41,7 @@ impl Action<PullModelRequest, PullModelResponse> {
 impl IntoStream<PullModelResponse> for Action<PullModelRequest, PullModelResponse> {
     async fn stream(mut self) -> Result<OllamaStream<PullModelResponse>, OllamaError> {
         self.request.stream = true;
-
-        let url = format!("{}{}", self.ollama.url(), self.request.path());
-        let mut reqwest_stream = self.ollama.post(&url, &self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
 
         let s = stream! {
             while let Some(stream_item) = reqwest_stream.next().await {

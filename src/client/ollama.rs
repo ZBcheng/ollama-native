@@ -1,4 +1,3 @@
-use serde::Serialize;
 use std::sync::Arc;
 
 use crate::abi::completion::{
@@ -9,7 +8,7 @@ use crate::abi::version::{VersionRequest, VersionResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
-use super::Action;
+use super::{Action, OllamaRequest};
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
@@ -29,7 +28,7 @@ use crate::abi::model::{
 
 pub struct OllamaClient {
     pub cli: reqwest::Client,
-    config: OllamaConfig,
+    pub config: OllamaConfig,
 }
 
 impl OllamaClient {
@@ -44,12 +43,12 @@ impl OllamaClient {
 
     pub async fn post(
         &self,
-        url: &str,
-        data: &impl Serialize,
+        request: &impl OllamaRequest,
     ) -> Result<reqwest::Response, OllamaError> {
         let serialized =
-            serde_json::to_vec(data).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
+            serde_json::to_vec(&request).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
 
+        let url = format!("{}{}", self.config.url, request.path());
         let response = self
             .cli
             .post(url)
@@ -60,7 +59,11 @@ impl OllamaClient {
         Ok(response)
     }
 
-    pub async fn get(&self, url: &str) -> Result<reqwest::Response, OllamaError> {
+    pub async fn get(
+        &self,
+        request: &impl OllamaRequest,
+    ) -> Result<reqwest::Response, OllamaError> {
+        let url = format!("{}{}", self.config.url, request.path());
         let response = self
             .cli
             .get(url)
