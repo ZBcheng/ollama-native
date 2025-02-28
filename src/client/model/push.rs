@@ -15,7 +15,7 @@ use {
 };
 
 impl Action<PushModelRequest, PushModelResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = PushModelRequest {
             model: model.to_string(),
             ..Default::default()

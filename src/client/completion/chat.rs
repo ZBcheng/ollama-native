@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
 
@@ -18,7 +18,7 @@ use {
 };
 
 impl Action<ChatRequest, ChatResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = ChatRequest {
             model: model.to_string(),
             messages: vec![],

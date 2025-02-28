@@ -10,7 +10,7 @@ use crate::{
 };
 
 impl Action<DeleteModelRequest, DeleteModelResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = DeleteModelRequest {
             model: model.to_string(),
         };

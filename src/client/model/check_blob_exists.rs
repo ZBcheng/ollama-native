@@ -10,7 +10,7 @@ use crate::{
 };
 
 impl Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, digest: &str) -> Self {
+    pub fn new(ollama: OllamaClient, digest: &str) -> Self {
         let request = CheckBlobExistsRequest {
             digest: digest.to_string(),
         };

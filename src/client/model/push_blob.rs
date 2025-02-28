@@ -10,7 +10,7 @@ use crate::{
 };
 
 impl Action<PushBlobRequest, PushBlobResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, file: &str, digest: &str) -> Self {
+    pub fn new(ollama: OllamaClient, file: &str, digest: &str) -> Self {
         let request = PushBlobRequest {
             file: file.to_string(),
             digest: digest.to_string(),

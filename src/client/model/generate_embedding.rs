@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Action<GenerateEmbeddingRequest, GenerateEmbeddingResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str, prompt: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str, prompt: &str) -> Self {
         let request = GenerateEmbeddingRequest {
             model: model.to_string(),
             prompt: prompt.to_string(),

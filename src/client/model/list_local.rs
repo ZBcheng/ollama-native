@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Action<ListLocalModelsRequest, ListLocalModelsResponse> {
-    pub fn new(ollama: Arc<OllamaClient>) -> Self {
+    pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
             request: ListLocalModelsRequest::default(),

@@ -10,7 +10,7 @@ use crate::{
 };
 
 impl Action<CopyModelRequest, CopyModelResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, source: &str, destination: &str) -> Self {
+    pub fn new(ollama: OllamaClient, source: &str, destination: &str) -> Self {
         let request = CopyModelRequest {
             source: source.to_string(),
             destination: destination.to_string(),

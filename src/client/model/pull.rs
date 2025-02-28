@@ -15,7 +15,7 @@ use crate::{
 };
 
 impl Action<PullModelRequest, PullModelResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = PullModelRequest {
             model: model.to_string(),
             ..Default::default()

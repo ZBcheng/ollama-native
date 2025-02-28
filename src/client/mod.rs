@@ -5,7 +5,7 @@ pub mod version;
 #[cfg(feature = "model")]
 pub mod model;
 
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use ollama::OllamaClient;
 use serde::Serialize;
@@ -14,7 +14,7 @@ use serde::Serialize;
 use {crate::error::OllamaError, async_trait::async_trait, futures::Stream, std::pin::Pin};
 
 pub struct Action<Request: OllamaRequest, Response> {
-    pub ollama: Arc<OllamaClient>,
+    pub ollama: OllamaClient,
     pub request: Request,
     pub _resp: PhantomData<Response>,
 }

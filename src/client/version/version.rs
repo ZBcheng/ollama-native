@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
 
@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Action<VersionRequest, VersionResponse> {
-    pub fn new(ollama: Arc<OllamaClient>) -> Self {
+    pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
             request: VersionRequest::default(),

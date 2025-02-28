@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Action<ListRunningModelsRequest, ListRunningModelsResponse> {
-    pub fn new(ollama: Arc<OllamaClient>) -> Self {
+    pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
             request: ListRunningModelsRequest::default(),

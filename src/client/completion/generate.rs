@@ -1,4 +1,4 @@
-use std::{marker::PhantomData, sync::Arc};
+use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
 
@@ -17,7 +17,7 @@ use crate::{
 };
 
 impl Action<GenerateRequest, GenerateResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str, prompt: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str, prompt: &str) -> Self {
         let request = GenerateRequest {
             model: model.to_string(),
             prompt: prompt.to_string(),

@@ -9,7 +9,7 @@ use crate::{
 };
 
 impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
-    pub fn new(ollama: Arc<OllamaClient>, model: &str) -> Self {
+    pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = ShowModelInformationRequest {
             model: model.to_string(),
             ..Default::default()

@@ -26,14 +26,16 @@ use crate::abi::model::{
     show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
 };
 
+#[derive(Clone)]
 pub struct OllamaClient {
     pub cli: reqwest::Client,
-    pub config: OllamaConfig,
+    pub config: Arc<OllamaConfig>,
 }
 
 impl OllamaClient {
     pub fn new(config: OllamaConfig) -> Self {
         let cli = reqwest::Client::new();
+        let config = Arc::new(config);
         Self { cli, config }
     }
 
@@ -75,32 +77,32 @@ impl OllamaClient {
 }
 
 pub struct Ollama {
-    client: Arc<OllamaClient>,
+    client: OllamaClient,
 }
 
 // Default feature
 impl Ollama {
     pub fn new(config: OllamaConfig) -> Self {
-        let client = Arc::new(OllamaClient::new(config));
+        let client = OllamaClient::new(config);
         Self { client }
     }
 
     /// Generate a response for a given prompt with a provided model.
     /// The final response object will include statistics and additional data from the request.
     pub fn generate(&self, model: &str, prompt: &str) -> Action<GenerateRequest, GenerateResponse> {
-        Action::<GenerateRequest, GenerateResponse>::new(Arc::clone(&self.client), model, prompt)
+        Action::<GenerateRequest, GenerateResponse>::new(self.client.clone(), model, prompt)
     }
 
     /// Generate the next message in a chat with a provided model. This is a streaming endpoint,
     /// so there will be a series of responses. The final response object will include statistics and
     /// additional data from the request.
     pub fn chat(&self, model: &str) -> Action<ChatRequest, ChatResponse> {
-        Action::<ChatRequest, ChatResponse>::new(Arc::clone(&self.client), model)
+        Action::<ChatRequest, ChatResponse>::new(self.client.clone(), model)
     }
 
     /// Retrieve the Ollama version.
     pub fn version(&self) -> Action<VersionRequest, VersionResponse> {
-        Action::<VersionRequest, VersionResponse>::new(Arc::clone(&self.client))
+        Action::<VersionRequest, VersionResponse>::new(self.client.clone())
     }
 }
 
@@ -114,19 +116,19 @@ impl Ollama {
     /// a blob` for each of the files and then use the file name and SHA256 digest associated with each
     /// blob in the files field.
     pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
-        Action::<CreateModelRequest, CreateModelResponse>::new(Arc::clone(&self.client), model)
+        Action::<CreateModelRequest, CreateModelResponse>::new(self.client.clone(), model)
     }
 
     /// List models that are available locally.
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
-        Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(Arc::clone(&self.client))
+        Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(self.client.clone())
     }
 
     /// List models that are currently loaded into memory.
     pub fn list_running_models(
         &self,
     ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
-        Action::<ListRunningModelsRequest, ListRunningModelsResponse>::new(Arc::clone(&self.client))
+        Action::<ListRunningModelsRequest, ListRunningModelsResponse>::new(self.client.clone())
     }
 
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
@@ -135,7 +137,7 @@ impl Ollama {
         model: &str,
     ) -> Action<ShowModelInformationRequest, ShowModelInformationResponse> {
         Action::<ShowModelInformationRequest, ShowModelInformationResponse>::new(
-            Arc::clone(&self.client),
+            self.client.clone(),
             model,
         )
     }
@@ -146,27 +148,23 @@ impl Ollama {
         source: &str,
         destination: &str,
     ) -> Action<CopyModelRequest, CopyModelResponse> {
-        Action::<CopyModelRequest, CopyModelResponse>::new(
-            Arc::clone(&self.client),
-            source,
-            destination,
-        )
+        Action::<CopyModelRequest, CopyModelResponse>::new(self.client.clone(), source, destination)
     }
 
     /// Delete a model and its data.
     pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
-        Action::<DeleteModelRequest, DeleteModelResponse>::new(Arc::clone(&self.client), model)
+        Action::<DeleteModelRequest, DeleteModelResponse>::new(self.client.clone(), model)
     }
 
     /// Download a model from the ollama library. Cancelled pulls are resumed
     /// from where they left off, and multiple calls will share the same download progress.
     pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
-        Action::<PullModelRequest, PullModelResponse>::new(Arc::clone(&self.client), model)
+        Action::<PullModelRequest, PullModelResponse>::new(self.client.clone(), model)
     }
 
     /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
-        Action::<PushModelRequest, PushModelResponse>::new(Arc::clone(&self.client), model)
+        Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
     }
 
     /// Generate embeddings from a model.
@@ -176,7 +174,7 @@ impl Ollama {
         prompt: &str,
     ) -> Action<GenerateEmbeddingRequest, GenerateEmbeddingResponse> {
         Action::<GenerateEmbeddingRequest, GenerateEmbeddingResponse>::new(
-            Arc::clone(&self.client),
+            self.client.clone(),
             model,
             prompt,
         )
@@ -188,7 +186,7 @@ impl Ollama {
         model: &str,
     ) -> Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
         Action::<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse>::new(
-            Arc::clone(&self.client),
+            self.client.clone(),
             model,
         )
     }
@@ -206,10 +204,7 @@ impl Ollama {
         &self,
         digest: &str,
     ) -> Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
-        Action::<CheckBlobExistsRequest, CheckBlobExistsResponse>::new(
-            Arc::clone(&self.client),
-            digest,
-        )
+        Action::<CheckBlobExistsRequest, CheckBlobExistsResponse>::new(self.client.clone(), digest)
     }
 
     /// Push a file to the Ollama server to create a "blob" (Binary Large Object).
@@ -222,7 +217,7 @@ impl Ollama {
     /// - `Ok(PushBlobRequest {})` if the blob was successfully created.
     /// - `Err(OllamaError::UnexpectedDigest)` if the digest used is not expected.
     pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
-        Action::<PushBlobRequest, PushBlobResponse>::new(Arc::clone(&self.client), file, digest)
+        Action::<PushBlobRequest, PushBlobResponse>::new(self.client.clone(), file, digest)
     }
 }
 
