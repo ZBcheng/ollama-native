@@ -26,7 +26,3 @@ pub enum OllamaError {
     #[error("unknown error: {0}")]
     UnknownError(String),
 }
-
-unsafe impl Send for OllamaError {}
-
-unsafe impl Sync for OllamaError {}
