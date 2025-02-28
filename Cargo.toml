@@ -10,14 +10,14 @@ futures = "0.3.31"
 serde = { version = "1.0.218", features = ["derive"] }
 serde_json = "1.0.139"
 thiserror = "2.0.11"
-reqwest = { version = "0.12.12", features = ["json", "stream"] }
+reqwest = { version = "0.12.12", features = ["json"] }
 async-stream = { version = "0.3.6" }
 tokio = { version = "1.43.0", features = ["full"] }
 tokio-stream = { version = "0.1.17", features = ["full"], optional = true }
 
 [features]
-model = []
 stream = ["tokio-stream", "reqwest/stream"]
+model = ["reqwest/multipart"]
 
 [dev-dependencies]
 ollama-native = { path = ".", features = ["stream", "model"] }
