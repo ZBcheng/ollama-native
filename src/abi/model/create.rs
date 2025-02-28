@@ -9,6 +9,7 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct CreateModelRequest {
     /// Name of the model to create.
@@ -57,6 +58,7 @@ pub struct CreateModelRequest {
     pub quantize: Option<String>,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct CreateModelResponse {
     pub status: String,

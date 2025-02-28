@@ -7,6 +7,7 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct GenerateEmbeddingsRequest {
     /// Name of model to generate embeddings from.
@@ -32,6 +33,7 @@ pub struct GenerateEmbeddingsRequest {
     pub keep_alive: Option<i64>,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct GenerateEmbeddingsResponse {
     pub model: String,
@@ -50,7 +52,7 @@ impl OllamaRequest for GenerateEmbeddingsRequest {
         RequestMethod::POST
     }
 
-    #[cfg(feature = "model")]
+    #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), OllamaError> {
         Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }

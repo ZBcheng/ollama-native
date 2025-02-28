@@ -10,6 +10,7 @@ use crate::{
 
 use super::ModelInfoDetail;
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Default)]
 pub struct ShowModelInformationRequest {
     /// Name of the model to show.
@@ -20,6 +21,7 @@ pub struct ShowModelInformationRequest {
     pub verbose: Option<bool>,
 }
 
+#[cfg(feature = "model")]
 #[derive(Deserialize, Debug)]
 pub struct ShowModelInformationResponse {
     pub license: String,

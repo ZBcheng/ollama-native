@@ -6,14 +6,17 @@ use crate::error::OllamaError;
 
 use super::ModelInfoDetail;
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct ListRunningModelsRequest {}
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct ListRunningModelsResponse {
     pub models: Vec<ListRunningModelsInfo>,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct ListRunningModelsInfo {
     pub name: String,

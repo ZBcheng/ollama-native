@@ -6,6 +6,7 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct PullModelRequest {
     /// Name of the model to pull.
@@ -20,6 +21,7 @@ pub struct PullModelRequest {
     pub stream: bool,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PullModelResponse {
     pub status: String,
@@ -37,6 +39,7 @@ impl OllamaRequest for PullModelRequest {
         RequestMethod::POST
     }
 
+    #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), crate::error::OllamaError> {
         self.stream = true;
         Ok(())

@@ -7,12 +7,14 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize)]
 pub struct DeleteModelRequest {
     /// Model name to delete.
     pub model: String,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Deserialize)]
 pub struct DeleteModelResponse {}
 
@@ -25,6 +27,7 @@ impl OllamaRequest for DeleteModelRequest {
         RequestMethod::DELETE
     }
 
+    #[cfg(feature = "stream")]
     fn set_stream(&mut self) -> Result<(), crate::error::OllamaError> {
         Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }

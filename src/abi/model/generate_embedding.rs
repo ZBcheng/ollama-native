@@ -7,6 +7,7 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct GenerateEmbeddingRequest {
     /// Name of model to generate embeddings from.
@@ -27,6 +28,7 @@ pub struct GenerateEmbeddingRequest {
     pub keep_alive: Option<i64>,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct GenerateEmbeddingResponse {
     pub embedding: Vec<f64>,

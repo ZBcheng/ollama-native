@@ -11,6 +11,7 @@ pub mod pull;
 pub mod push;
 pub mod show_info;
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
 pub struct ModelInfoDetail {
     pub format: String,

@@ -7,12 +7,14 @@ use crate::{
     error::OllamaError,
 };
 
+#[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize)]
 pub struct CopyModelRequest {
     pub source: String,
     pub destination: String,
 }
 
+#[cfg(feature = "model")]
 #[derive(Debug, Deserialize, Default)]
 pub struct CopyModelResponse {}
 
