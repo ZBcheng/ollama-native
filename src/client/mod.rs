@@ -5,9 +5,6 @@ pub mod version;
 #[cfg(feature = "model")]
 pub mod model;
 
-#[cfg(feature = "embedding")]
-pub mod embedding;
-
 use std::{marker::PhantomData, sync::Arc};
 
 use async_trait::async_trait;

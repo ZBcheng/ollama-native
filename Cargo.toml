@@ -17,10 +17,9 @@ tokio-stream = { version = "0.1.17", features = ["full"], optional = true }
 
 [features]
 model = []
-embedding = []
 stream = ["tokio-stream", "reqwest/stream"]
 
 [dev-dependencies]
-ollama-native = { path = ".", features = ["stream", "model", "embedding"] }
+ollama-native = { path = ".", features = ["stream", "model"] }
 tokio = { version = "1.43.0", features = ["full"] }
 tokio-stream = { version = "0.1.17", features = ["full"] }
