@@ -1,11 +1,14 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::completion::{
-    chat::{ChatRequest, ChatResponse},
-    generate::{GenerateRequest, GenerateResponse},
-};
 use crate::abi::version::version::{VersionRequest, VersionResponse};
+use crate::abi::{
+    completion::{
+        chat::{ChatRequest, ChatResponse},
+        generate::{GenerateRequest, GenerateResponse},
+    },
+    model::generate_embedding::{GenerateEmbeddingRequest, GenerateEmbeddingResponse},
+};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -178,6 +181,19 @@ impl Ollama {
     /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
         Action::<PushModelRequest, PushModelResponse>::new(Arc::clone(&self.client), model)
+    }
+
+    /// Generate embeddings from a model.
+    pub fn generate_embedding(
+        &self,
+        model: &str,
+        prompt: &str,
+    ) -> Action<GenerateEmbeddingRequest, GenerateEmbeddingResponse> {
+        Action::<GenerateEmbeddingRequest, GenerateEmbeddingResponse>::new(
+            Arc::clone(&self.client),
+            model,
+            prompt,
+        )
     }
 }
 
@@ -473,6 +489,17 @@ mod tests {
         let ollama = Ollama::new(mock_config());
         let version = ollama.version().await.unwrap();
         println!("version: {version:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn generate_embedding_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama
+            .generate_embedding("llama3.2:1b", "Here is an article about llamas...")
+            .await
+            .unwrap();
+        println!("{resp:?}");
     }
 
     fn mock_config() -> OllamaConfig {
