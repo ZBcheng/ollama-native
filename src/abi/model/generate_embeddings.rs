@@ -8,12 +8,17 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct GenerateEmbeddingRequest {
+pub struct GenerateEmbeddingsRequest {
     /// Name of model to generate embeddings from.
     pub model: String,
 
-    /// Text to generate embeddings for.
-    pub prompt: String,
+    /// List of text to generate embeddings for.
+    pub input: Vec<String>,
+
+    /// Truncates the end of each input to fit within context length.
+    /// Returns error if `false` and context length is exceeded. Defaults to `true`.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub truncate: Option<bool>,
 
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
@@ -28,28 +33,33 @@ pub struct GenerateEmbeddingRequest {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct GenerateEmbeddingResponse {
-    pub embedding: Vec<f64>,
+pub struct GenerateEmbeddingsResponse {
+    pub model: String,
+    pub embeddings: Vec<Vec<f64>>,
+    pub total_duration: Option<i64>,
+    pub load_duration: Option<i64>,
+    pub prompt_eval_count: Option<i64>,
 }
 
-impl OllamaRequest for GenerateEmbeddingRequest {
+impl OllamaRequest for GenerateEmbeddingsRequest {
     fn path(&self) -> &str {
-        "/api/embeddings"
+        "/api/embed"
     }
 
     fn method(&self) -> RequestMethod {
         RequestMethod::POST
     }
 
-    #[cfg(feature = "stream")]
+    #[cfg(feature = "model")]
     fn set_stream(&mut self) -> Result<(), OllamaError> {
         Err(OllamaError::FeatureNotAvailable("stream".to_string()))
     }
 }
 
 #[async_trait]
-impl OllamaResponse for GenerateEmbeddingResponse {
+impl OllamaResponse for GenerateEmbeddingsResponse {
     async fn parse_response(response: reqwest::Response) -> Result<Self, OllamaError> {
+        println!("{response:?}");
         let content = response
             .json()
             .await

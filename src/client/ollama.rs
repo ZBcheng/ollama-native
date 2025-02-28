@@ -1,15 +1,11 @@
 use serde::Serialize;
 use std::sync::Arc;
 
-use crate::abi::model::list_running::{ListRunningModelsRequest, ListRunningModelsResponse};
-use crate::abi::version::version::{VersionRequest, VersionResponse};
-use crate::abi::{
-    completion::{
-        chat::{ChatRequest, ChatResponse},
-        generate::{GenerateRequest, GenerateResponse},
-    },
-    model::generate_embedding::{GenerateEmbeddingRequest, GenerateEmbeddingResponse},
+use crate::abi::completion::{
+    chat::{ChatRequest, ChatResponse},
+    generate::{GenerateRequest, GenerateResponse},
 };
+use crate::abi::version::version::{VersionRequest, VersionResponse};
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
 
@@ -18,7 +14,10 @@ use crate::abi::model::{
     copy::{CopyModelRequest, CopyModelResponse},
     create::{CreateModelRequest, CreateModelResponse},
     delete::{DeleteModelRequest, DeleteModelResponse},
+    generate_embedding::{GenerateEmbeddingRequest, GenerateEmbeddingResponse},
+    generate_embeddings::{GenerateEmbeddingsRequest, GenerateEmbeddingsResponse},
     list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
+    list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
     pull::{PullModelRequest, PullModelResponse},
     push::{PushModelRequest, PushModelResponse},
     show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
@@ -201,6 +200,17 @@ impl Ollama {
             Arc::clone(&self.client),
             model,
             prompt,
+        )
+    }
+
+    /// Generate embeddings from a model.
+    pub fn generate_embeddings(
+        &self,
+        model: &str,
+    ) -> Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
+        Action::<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse>::new(
+            Arc::clone(&self.client),
+            model,
         )
     }
 }
@@ -515,6 +525,20 @@ mod tests {
     async fn list_running_models_should_work() {
         let ollama = Ollama::new(mock_config());
         let resp = ollama.list_running_models().await.unwrap();
+        println!("{resp:?}");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn generate_embeddings_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama
+            .generate_embeddings("llama3.2:1b")
+            .input("Why the sky is blue")
+            .input("How are you")
+            .inputs(&vec!["haha".to_string()])
+            .await
+            .unwrap();
         println!("{resp:?}");
     }
 
