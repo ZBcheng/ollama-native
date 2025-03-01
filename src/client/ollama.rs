@@ -127,6 +127,55 @@ impl Ollama {
     /// Generate the next message in a chat with a provided model. This is a streaming endpoint,
     /// so there will be a series of responses. The final response object will include statistics and
     /// additional data from the request.
+    ///
+    /// # Parameters
+    /// - `model`: The model to use for generating the response.
+    /// - `messages`: The messages of the chat.
+    /// - `tools`: (optional) List of tools in JSON for the model to use if supported
+    /// - `format`: (optional) The format to return a response in. Format can be `json` or a JSON schema.
+    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as `temperature`.
+    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
+    /// - `stream`: (optional) If `false` the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError` if there is an error with the request.
+    /// - `OllamaError::DecodeError` if there is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError` if there is an error decoding the stream.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use ollama_native::Ollama;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let ollama = Ollama::new("http://localhost:11434");
+    ///     
+    ///     // Generate a completion in json format.
+    ///     let response = ollama
+    ///         .chat("llama3.1:8b")
+    ///         .system_message("You are a robot who likes to tell jokes")
+    ///         .user_message("Who are you?")
+    ///         .format("json")
+    ///         .await?;
+    ///
+    ///     println!("{}", response.message.unwrap().content);
+    ///
+    ///     // Or use a Vec of messages.
+    ///     let messages = vec![
+    ///         Message::new_system("You are a robot who likes to tell jokes"),
+    ///         Message::new_user("Who are you?"),
+    ///     ];
+    ///
+    ///     let response = ollama
+    ///         .chat("llama3.1:8b")
+    ///         .messages(&messages)
+    ///         .format("json")
+    ///         .await?;
+    ///
+    ///     println!("{}", response.message.unwrap().content);
+    ///
+    ///     Ok(())
+    /// }
     pub fn chat(&self, model: &str) -> Action<ChatRequest, ChatResponse> {
         Action::<ChatRequest, ChatResponse>::new(self.client.clone(), model)
     }
