@@ -29,7 +29,7 @@ impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
     }
 
     /// List of text to generate embeddings for.
-    pub fn inputs(mut self, inputs: &Vec<String>) -> Self {
+    pub fn inputs(mut self, inputs: &Vec<impl ToString>) -> Self {
         inputs
             .iter()
             .for_each(|input| self.request.input.push(input.to_string()));
