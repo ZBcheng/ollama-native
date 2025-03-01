@@ -182,6 +182,10 @@ impl Ollama {
     }
 
     /// Retrieve the Ollama version.
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn version(&self) -> Action<VersionRequest, VersionResponse> {
         Action::<VersionRequest, VersionResponse>::new(self.client.clone())
     }
