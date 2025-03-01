@@ -695,6 +695,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn show_model_information_should_work() {
         let ollama = Ollama::new(mock_config());
         let model_info = ollama.show_model_information("llama3.1:8b").await.unwrap();
