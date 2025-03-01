@@ -10,7 +10,7 @@ For users who need features like chat with history, these functionalities can be
 ## Features
 - **Minimal Functionality**: Offers the core functionalities of Ollama without extra features or complexity.
 - **Rusty APIs**: Utilizes chainable methods, making the API simple, concise, and idiomatic to Rust.
-- 
+
 ## APIs
 - [x] Generate a completion
 - [x] Generate a chat completion
