@@ -90,6 +90,36 @@ impl Ollama {
 
     /// Generate a response for a given prompt with a provided model.
     /// The final response object will include statistics and additional data from the request.
+    ///
+    /// # Parameters
+    /// - `model`: The model to use for generating the response.
+    /// - `prompt`: The prompt to generate a response for.
+    /// - `suffix`: (optional) The text after the model response.
+    /// - `images`: (optional) A list of base64-encoded images (for multimodal models such as `llava`).
+    /// - `format`: (optional) The format to return a response in. Format can be `json` or a JSON schema.
+    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as temperature.
+    /// - `system`: (optional) System message to (overrides what is defined in the `Modelfile`).
+    /// - `template`: (optional) The prompt template to use (overrides what is defined in the `Modelfile`).
+    /// - `stream`: (optional) If `false` the response will be returned as a single response object, rather than a stream of objects.
+    /// - `raw`: (optional) If `true` no formatting will be applied to the prompt. You may choose to use the `raw` parameter if you are specifying a full templated prompt in your request to the API.
+    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError` if there is an error with the request.
+    /// - `OllamaError::DecodeError` if there is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError` if there is an error decoding the stream.
+    ///
+    /// # Examples
+    /// ```rust
+    /// use ollama_native::Ollama;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///   let ollama = Ollama::new("http://localhost:11434");
+    ///
+    ///   let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
+    ///   println!("{}", response.response);
+    /// }
     pub fn generate(&self, model: &str, prompt: &str) -> Action<GenerateRequest, GenerateResponse> {
         Action::<GenerateRequest, GenerateResponse>::new(self.client.clone(), model, prompt)
     }
