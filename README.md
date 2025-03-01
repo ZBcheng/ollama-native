@@ -68,7 +68,6 @@ while let Some(Ok(item)) = stream.next().await {
 ```
 
 ### Structured Ouput
-See [structured outputs example][structured-outputs-example] for more details.
 ```rust
 // JSON mode
 let resposne = ollama
@@ -118,10 +117,10 @@ let resposne = ollama
 This project is licensed under the [MIT license][license].
 
 [examples]: https://github.com/ZBcheng/examples
-[generate-completion]: https://github.com/ZBcheng/examples]/generate-completions.rs
-[chat-request-stream]: https://github.com/ZBcheng/examples]/chat-request-stream.rs
-[chat-with-images]: https://github.com/ZBcheng/examples]/chat-with-images.rs
-[generate-embeddings]: https://github.com/ZBcheng/examples]/generate-embeddings.rs
-[structured-outputs-example]: https://github.com/ZBcheng/examples]/structured_outputs.rs
+[generate-completion]: https://github.com/ZBcheng/examples/generate_completions.rs
+[chat-request-stream]: https://github.com/ZBcheng/examples/chat_request_stream.rs
+[chat-with-images]: https://github.com/ZBcheng/examples/chat_with_images.rs
+[generate-embeddings]: https://github.com/ZBcheng/examples/generate_embeddings.rs
+[structured-outputs-example]: https://github.com/ZBcheng/examples/structured_outputs.rs
 [ollama-api-doc]: https://github.com/ollama/ollama/blob/main/docs/api.md
 [license]: https://github.com/ZBcheng/ollama-native/blob/main/LICENSE
