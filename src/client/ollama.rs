@@ -320,6 +320,34 @@ impl Ollama {
 
     /// Download a model from the ollama library. Cancelled pulls are resumed
     /// from where they left off, and multiple calls will share the same download progress.
+    ///
+    /// # Parameters
+    /// - `model`: Name of the model to pull.
+    /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pulling from your own library during development.
+    /// - `stream`: (optional) If not specified (default) the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Returns
+    /// **If `stream` is not specified (default), a single response object is returned:**
+    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
+    ///
+    /// **If `stream` is set to `true`, a stream of JSON objects is returned:**
+    /// The first object is the manifest
+    /// - `PullModelResponse { status: "pulling manifest" }`
+    ///
+    /// Then there is a series of downloading responses. Until any of the download is completed, the completed key may not be included.
+    /// The number of files to be downloaded depends on the number of layers specified in the manifest.
+    /// - `PullModelResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`
+    ///
+    /// After all the files are downloaded, the final responses are:
+    /// - `PullModelResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`
+    /// - `PullModelResponse { status: "writing manifest", digest: None, total: None, completed: None }`
+    /// - `PullModelResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`
+    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
         Action::<PullModelRequest, PullModelResponse>::new(self.client.clone(), model)
     }
