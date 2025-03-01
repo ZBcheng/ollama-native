@@ -64,7 +64,7 @@ impl IntoStream<PullModelResponse> for Action<PullModelRequest, PullModelRespons
 
 #[cfg(feature = "stream")]
 fn parse_chunks(chunks: &[u8]) -> Result<Vec<PullModelResponse>, OllamaError> {
-    let chunks = str::from_utf8(&chunks).map_err(|e| {
+    let chunks = std::str::from_utf8(&chunks).map_err(|e| {
         OllamaError::StreamDecodingError(format!("failed to parse chunk to utf8: {e}"))
     })?;
 
