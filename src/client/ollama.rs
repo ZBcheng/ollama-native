@@ -16,7 +16,6 @@ use crate::abi::model::{
     copy::{CopyModelRequest, CopyModelResponse},
     create::{CreateModelRequest, CreateModelResponse},
     delete::{DeleteModelRequest, DeleteModelResponse},
-    generate_embedding::{GenerateEmbeddingRequest, GenerateEmbeddingResponse},
     generate_embeddings::{GenerateEmbeddingsRequest, GenerateEmbeddingsResponse},
     list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
     list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
@@ -371,36 +370,6 @@ impl Ollama {
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
         Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
-    }
-
-    /// Generate embeddings from a model.
-    ///
-    /// # Parameters
-    /// - `model`: Name of model to generate embeddings from.
-    /// - `input`: Text or list of text to generate embeddings for.
-    /// - `truncate`: (optional) Truncates the end of each input to fit within context length. Returns error if `false` and context length is exceeded. Defaults to `true`.
-    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as `temperature`.
-    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
-    ///
-    /// # Returns
-    /// - `GenerateEmbeddingsResponse {
-    ///    embeddings: vec![0.5670403838157654, 0.009260174818336964, 0.23178744316101074, -0.2916173040866852, -0.8924556970596313,
-    ///     0.8785552978515625, -0.34576427936553955, 0.5742510557174683, -0.04222835972905159, -0.137906014919281]
-    /// }`
-    ///
-    /// # Errors
-    /// - `OllamaError::RequestError`: There is an error with the request.
-    /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    pub fn generate_embedding(
-        &self,
-        model: &str,
-        prompt: &str,
-    ) -> Action<GenerateEmbeddingRequest, GenerateEmbeddingResponse> {
-        Action::<GenerateEmbeddingRequest, GenerateEmbeddingResponse>::new(
-            self.client.clone(),
-            model,
-            prompt,
-        )
     }
 
     /// Generate embeddings from a model.
@@ -766,17 +735,6 @@ mod tests {
         let ollama = Ollama::new(mock_config());
         let version = ollama.version().await.unwrap();
         println!("version: {version:?}");
-    }
-
-    #[tokio::test]
-    #[ignore]
-    async fn generate_embedding_should_work() {
-        let ollama = Ollama::new(mock_config());
-        let resp = ollama
-            .generate_embedding("llama3.2:1b", "Here is an article about llamas...")
-            .await
-            .unwrap();
-        println!("{resp:?}");
     }
 
     #[tokio::test]
