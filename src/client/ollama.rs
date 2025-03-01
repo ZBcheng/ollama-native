@@ -347,6 +347,25 @@ impl Ollama {
     }
 
     /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
+    ///
+    /// # Parameters
+    /// - `model`: Name of the model to push in the form of `<namespace>/<model>:<tag>`.
+    /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pushing to your own library during development.
+    /// - `stream`: (optional) If not specified the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Returns
+    /// **If `stream` is not specified, a single response object is returned:**<br>
+    /// `PushModelResponse { status: "success", digest: None, total: None }`
+    ///
+    /// **If `stream` is specified, a stream of JSON objects is returned:**<br>
+    /// - `PushModelResponse { status: "retrieving manifest" }`<br>
+    /// - `PushModelResponse { status: "starting upload", digest: Some("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab"), total: Some(1928429856) }`<br>
+    /// - `PushModelResponse { status: "success", digest: None, total: None }`
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
         Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
     }
