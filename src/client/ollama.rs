@@ -330,19 +330,13 @@ impl Ollama {
     /// **If `stream` is not specified (default), a single response object is returned:**
     /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
     ///
-    /// **If `stream` is set to `true`, a stream of JSON objects is returned:**
-    /// The first object is the manifest
-    /// - `PullModelResponse { status: "pulling manifest" }`
-    ///
-    /// Then there is a series of downloading responses. Until any of the download is completed, the completed key may not be included.
-    /// The number of files to be downloaded depends on the number of layers specified in the manifest.
-    /// - `PullModelResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`
-    ///
-    /// After all the files are downloaded, the final responses are:
-    /// - `PullModelResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`
-    /// - `PullModelResponse { status: "writing manifest", digest: None, total: None, completed: None }`
-    /// - `PullModelResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`
-    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
+    /// **If `stream` is specified, a stream of JSON objects is returned:**
+    /// - `PullModelResponse { status: "pulling manifest" }`<br>
+    /// - `PullModelResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`<br>
+    /// - `PullModelResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelResponse { status: "writing manifest", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`<br>
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
