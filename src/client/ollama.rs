@@ -476,8 +476,12 @@ impl Ollama {
     /// - `digest`: The expected SHA256 digest of the file.
     ///
     /// # Returns
-    /// - `Ok(PushBlobRequest {})` if the blob was successfully created.
-    /// - `Err(OllamaError::UnexpectedDigest)` if the digest used is not expected.
+    /// - `PushBlobRequest {}`
+    ///
+    /// # Errors
+    /// - `OllamaError::UnexpectedDigest`: The digest used is not expected.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
         Action::<PushBlobRequest, PushBlobResponse>::new(self.client.clone(), file, digest)
     }
