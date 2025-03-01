@@ -16,7 +16,7 @@ pub struct GenerateRequest {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub suffix: Option<String>,
 
-    /// A list of base64-encoded images (for multimodal models such as `llvaa`).
+    /// A list of base64-encoded images (for multimodal models such as `llava`).
     #[serde(skip_serializing_if = "Vec::is_empty")]
     pub images: Vec<String>,
 

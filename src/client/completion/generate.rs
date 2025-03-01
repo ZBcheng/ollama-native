@@ -39,7 +39,7 @@ impl Action<GenerateRequest, GenerateResponse> {
         self
     }
 
-    /// A list of base64-encoded images (for multimodal models such as `llvaa`).
+    /// A list of base64-encoded images (for multimodal models such as `llava`).
     pub fn images(mut self, images: Vec<String>) -> Self {
         self.request.images = images;
         self
