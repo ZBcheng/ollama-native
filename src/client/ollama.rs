@@ -200,6 +200,40 @@ impl Ollama {
     /// If you are creating a model from a safetensors directory or from a GGUF file, you must `create
     /// a blob` for each of the files and then use the file name and SHA256 digest associated with each
     /// blob in the files field.
+    ///
+    /// # Parameters
+    /// - `model`: The model to create.
+    /// - `from`: (optional) Name of an existing model to create the new model from.
+    /// - `files`: (optional) A dictionary of file names to SHA256 digests of blobs to create the model from.
+    /// - `adapters`: (optional) A dictionary of file names to SHA256 digests of blobs for LORA adapters.
+    /// - `template`: (optional) The prompt template for the model.
+    /// - `license`: (optional) A string or list of strings containing the license or licenses for the model.
+    /// - `system`: (optional) A string containing the system prompt for the model.
+    /// - `parameters`: (optional) A dictionary of parameters for the model.
+    /// - `messages`: (optional) A list of messages objects used to create a conversation.
+    /// - `quantize`: (optional) Quantize a non-quantized (e.g. float16) model.
+    /// - `stream`: (optional) If `false` the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    ///
+    /// # Examples
+    /// ```rust
+    ///     // Create a new model from an existing model.
+    ///     let _ = ollama
+    ///         .create_model("mario")
+    ///         .from("llama3.1:8b")
+    ///         .system("You are Mario from Super Mario Bros.")
+    ///         .await?;
+    ///     
+    ///     // Quantize a non-quantized model.
+    ///     let _ = ollama
+    ///         .create_model("llama3.1:quantized")
+    ///         .from("llama3.1:8b-instruct-fp16")
+    ///         .quantize("q4_K_M")
+    ///         .await?;
+    /// ```
     pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
         Action::<CreateModelRequest, CreateModelResponse>::new(self.client.clone(), model)
     }
