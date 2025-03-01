@@ -82,7 +82,8 @@ pub struct Ollama {
 
 // Default feature
 impl Ollama {
-    pub fn new(config: OllamaConfig) -> Self {
+    pub fn new(url: &str) -> Self {
+        let config = OllamaConfig::from_url(url);
         let client = OllamaClient::new(config);
         Self { client }
     }
@@ -231,7 +232,6 @@ mod tests {
     use crate::{
         abi::Message,
         client::{IntoStream, OllamaStream, ollama::Ollama},
-        config::OllamaConfig,
     };
 
     #[tokio::test]
@@ -546,8 +546,8 @@ mod tests {
         let _ = ollama.push_blob("xx", "digest:lxlkc").await;
     }
 
-    fn mock_config() -> OllamaConfig {
-        OllamaConfig::from_url("http://localhost:11434")
+    fn mock_config() -> &'static str {
+        "http://localhost:11434"
     }
 
     async fn print_stream<T: Serialize>(mut resp: OllamaStream<T>) {
