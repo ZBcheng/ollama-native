@@ -836,9 +836,3 @@ mod tests {
         out.flush().await.unwrap();
     }
 }
-//     }
-
-//     fn mock_config() -> OllamaConfig {
-//         OllamaConfig::from_url("http://localhost:11434")
-//     }
-// }
