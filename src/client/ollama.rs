@@ -307,6 +307,13 @@ impl Ollama {
     }
 
     /// Delete a model and its data.
+    /// # Parameter
+    /// - `model`: Name of the model to delete.
+    ///
+    /// # Errors
+    /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
         Action::<DeleteModelRequest, DeleteModelResponse>::new(self.client.clone(), model)
     }
