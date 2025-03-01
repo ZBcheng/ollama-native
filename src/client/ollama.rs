@@ -456,8 +456,12 @@ impl Ollama {
     /// - `digest`: The SHA256 digest of the blob.
     ///
     /// # Returns
-    /// - `Ok(CheckBlobExistsResponse {})` if blob exists.
-    /// - `Err(OllamaError::BlobDoesNotExist)` if blob does not exist.
+    /// - `CheckBlobExistsResponse {}`
+    ///
+    /// # Errors
+    /// - `OllamaError::BlobDoesNotExist`: The file blob does not exist.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn check_blob_exists(
         &self,
         digest: &str,
