@@ -1,5 +1,7 @@
 use std::{collections::HashMap, marker::PhantomData};
 
+use futures::future::BoxFuture;
+
 use crate::abi::{
     Message,
     model::create::{CreateModelRequest, CreateModelResponse},
@@ -225,6 +227,23 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     pub fn min_p(mut self, min_p: f64) -> Self {
         self.request.parameters.min_p(min_p);
         self
+    }
+}
+
+#[cfg(feature = "model")]
+impl IntoFuture for Action<CreateModelRequest, CreateModelResponse> {
+    type Output = Result<CreateModelResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'static, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let response = reqwest_resp
+                .json()
+                .await
+                .map_err(|e| OllamaError::DecodingError(e))?;
+            Ok(response)
+        })
     }
 }
 
