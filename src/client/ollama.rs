@@ -105,9 +105,9 @@ impl Ollama {
     /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
     ///
     /// # Errors
-    /// - `OllamaError::RequestError` if there is an error with the request.
-    /// - `OllamaError::DecodeError` if there is an error decoding the response.
-    /// - `OllamaError::StreamDecodingError` if there is an error decoding the stream.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
     /// ```rust
@@ -115,10 +115,11 @@ impl Ollama {
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///   let ollama = Ollama::new("http://localhost:11434");
+    ///     let ollama = Ollama::new("http://localhost:11434");
     ///
-    ///   let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
-    ///   println!("{}", response.response);
+    ///     let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
+    ///     println!("{}", response.response);
+    ///     Ok(())
     /// }
     pub fn generate(&self, model: &str, prompt: &str) -> Action<GenerateRequest, GenerateResponse> {
         Action::<GenerateRequest, GenerateResponse>::new(self.client.clone(), model, prompt)
@@ -138,13 +139,13 @@ impl Ollama {
     /// - `stream`: (optional) If `false` the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Errors
-    /// - `OllamaError::RequestError` if there is an error with the request.
-    /// - `OllamaError::DecodeError` if there is an error decoding the response.
-    /// - `OllamaError::StreamDecodingError` if there is an error decoding the stream.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
     /// ```rust
-    /// use ollama_native::Ollama;
+    /// use ollama_native::{Message, Ollama};
     ///
     /// #[tokio::main]
     /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
