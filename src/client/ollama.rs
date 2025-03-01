@@ -352,15 +352,17 @@ impl Ollama {
     /// # Parameters
     /// - `model`: Name of the model to push in the form of `<namespace>/<model>:<tag>`.
     /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pushing to your own library during development.
-    /// - `stream`: (optional) If not specified the response will be returned as a single response object, rather than a stream of objects.
+    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
     /// **If `stream` is not specified, a single response object is returned:**<br>
-    /// `PushModelResponse { status: "success", digest: None, total: None }`
+    /// - `PushModelResponse { status: "success", digest: None, total: None }`
     ///
     /// **If `stream` is specified, a stream of JSON objects is returned:**<br>
-    /// - `PushModelResponse { status: "retrieving manifest" }`<br>
+    /// - `PushModelResponse { status: "retrieving manifest", digest: None, total: None }`<br>
     /// - `PushModelResponse { status: "starting upload", digest: Some("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab"), total: Some(1928429856) }`<br>
+    /// - `PushModelResponse { status: "pushing manifest", digest: None, total: None }`<br>
+    /// - `...`<br>
     /// - `PushModelResponse { status: "success", digest: None, total: None }`
     ///
     /// # Errors
