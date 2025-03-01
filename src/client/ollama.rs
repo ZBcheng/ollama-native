@@ -404,6 +404,41 @@ impl Ollama {
     }
 
     /// Generate embeddings from a model.
+    ///
+    /// # Parameters
+    /// - `model`: Name of model to generate embeddings from.
+    /// - `input`: A list of text to generate embeddings for.
+    /// - `truncate`: (optional) Truncates the end of each input to fit within context length. Returns error if `false` and context length is exceeded. Defaults to `true`.
+    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as `temperature`.
+    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
+    ///
+    /// # Returns
+    /// **Single input:**
+    /// - `GenerateEmbeddingsResponse {
+    ///     model: "all-minilm",
+    ///     embeddings: vec![
+    ///         vec![0.010071029, -0.0017594862, 0.05007221, 0.04692972, 0.054916814, 0.008599704, 0.105441414, -0.025878139, 0.12958129, 0.031952348]
+    ///     ],
+    ///     total_duration: Some(14143917),
+    ///     load_duration: Some(1019500),
+    ///     prompt_eval_count: Some(8)
+    /// }`
+    ///
+    /// **Multiple input:**
+    /// - `GenerateEmbeddingsResponse {
+    ///     model: "all-minilm",
+    ///     embeddings: vec![
+    ///         vec![0.010071029, -0.0017594862, 0.05007221, 0.04692972, 0.054916814, 0.008599704, 0.105441414, -0.025878139, 0.12958129, 0.031952348],
+    ///         vec![-0.0098027075, 0.06042469, 0.025257962, -0.006364387, 0.07272725, 0.017194884, 0.09032035, -0.051705178, 0.09951512, 0.09072481]
+    ///     ],
+    ///     total_duration: None,
+    ///     load_duration: None,
+    ///     prompt_eval_count: None
+    /// }`
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn generate_embeddings(
         &self,
         model: &str,
