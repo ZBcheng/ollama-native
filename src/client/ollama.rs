@@ -258,6 +258,13 @@ impl Ollama {
     }
 
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
+    /// # Parameters
+    /// - `model`: Name of the model to show.
+    /// - `verbose`: (optional) If set to `true`, returns full data for verbose response fields
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn show_model_information(
         &self,
         model: &str,
