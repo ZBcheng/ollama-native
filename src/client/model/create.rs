@@ -239,7 +239,7 @@ impl IntoFuture for Action<CreateModelRequest, CreateModelResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
             let response = reqwest_resp
                 .json()
                 .await
@@ -255,7 +255,7 @@ impl IntoStream<CreateModelResponse> for Action<CreateModelRequest, CreateModelR
     async fn stream(mut self) -> Result<OllamaStream<CreateModelResponse>, OllamaError> {
         self.request.stream = true;
 
-        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 
         let s = stream! {
             while let Some(stream_item) = reqwest_stream.next().await {

@@ -160,7 +160,7 @@ impl IntoFuture for Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
             let response = reqwest_resp
                 .json()
                 .await

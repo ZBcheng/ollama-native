@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 use crate::{abi::Parameter, client::OllamaRequest};
 
+use super::chat::Format;
+
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct GenerateRequest {
     /// The model name.
@@ -22,7 +24,7 @@ pub struct GenerateRequest {
 
     /// The foramt to return a response in. Format can be `json` or a JSON schema.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub format: Option<serde_json::Value>,
+    pub format: Option<Format>,
 
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)

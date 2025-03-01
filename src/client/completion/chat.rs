@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 
 use crate::abi::{
     Message,
@@ -201,8 +202,16 @@ impl IntoFuture for Action<ChatRequest, ChatResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let headers = match self.request.format {
+                Some(_) => {
+                    let mut headers = HeaderMap::new();
+                    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                    Some(headers)
+                }
+                None => None,
+            };
 
+            let reqwest_resp = self.ollama.post(&self.request, headers).await?;
             let content = reqwest_resp
                 .json()
                 .await
@@ -218,7 +227,7 @@ impl IntoStream<ChatResponse> for Action<ChatRequest, ChatResponse> {
     async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
         self.request.stream = true;
 
-        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 
         let s = stream! {
             while let Some(item) = reqwest_stream.next().await {

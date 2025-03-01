@@ -41,7 +41,7 @@ impl Action<PushModelRequest, PushModelResponse> {
 impl IntoStream<PushModelResponse> for Action<PushModelRequest, PushModelResponse> {
     async fn stream(mut self) -> Result<OllamaStream<PushModelResponse>, OllamaError> {
         self.request.stream = true;
-        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 
         let s = stream! {
             while let Some(stream_item) = reqwest_stream.next().await {

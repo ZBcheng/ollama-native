@@ -1,6 +1,7 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 
 #[cfg(feature = "stream")]
 use {
@@ -11,7 +12,10 @@ use {
 };
 
 use crate::{
-    abi::completion::generate::{GenerateRequest, GenerateResponse},
+    abi::completion::{
+        chat::Format,
+        generate::{GenerateRequest, GenerateResponse},
+    },
     client::{Action, ollama::OllamaClient},
     error::OllamaError,
 };
@@ -45,9 +49,13 @@ impl Action<GenerateRequest, GenerateResponse> {
         self
     }
 
-    /// The foramt to return a response in. Format can be `json` or a JSON schema.
-    pub fn try_format(mut self, format: serde_json::Value) -> Self {
-        self.request.format = Some(format);
+    /// Return a response in JSON format.
+    pub fn format(mut self, format: &str) -> Self {
+        let fmt = match format.to_lowercase().as_str() {
+            "json" => Format::Json,
+            _ => Format::Schema(format.to_string()),
+        };
+        self.request.format = Some(fmt);
         self
     }
 
@@ -185,7 +193,15 @@ impl IntoFuture for Action<GenerateRequest, GenerateResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let headers = match self.request.format {
+                Some(_) => {
+                    let mut headers = HeaderMap::new();
+                    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                    Some(headers)
+                }
+                None => None,
+            };
+            let reqwest_resp = self.ollama.post(&self.request, headers).await?;
             let response = reqwest_resp
                 .json()
                 .await
@@ -200,7 +216,7 @@ impl IntoFuture for Action<GenerateRequest, GenerateResponse> {
 impl IntoStream<GenerateResponse> for Action<GenerateRequest, GenerateResponse> {
     async fn stream(mut self) -> Result<OllamaStream<GenerateResponse>, OllamaError> {
         self.request.stream = true;
-        let mut reqwest_stream = self.ollama.post(&self.request).await?.bytes_stream();
+        let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 
         let s = stream! {
             while let Some(item) = reqwest_stream.next().await {

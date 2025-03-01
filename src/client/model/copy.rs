@@ -30,7 +30,7 @@ impl IntoFuture for Action<CopyModelRequest, CopyModelResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request).await?;
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
             match reqwest_resp.status() {
                 StatusCode::OK => Ok(CopyModelResponse::default()),
                 StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),

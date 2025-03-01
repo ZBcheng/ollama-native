@@ -1,5 +1,7 @@
 use std::sync::Arc;
 
+use reqwest::header::HeaderMap;
+
 use crate::abi::completion::{
     chat::{ChatRequest, ChatResponse},
     generate::{GenerateRequest, GenerateResponse},
@@ -45,6 +47,7 @@ impl OllamaClient {
     pub async fn post(
         &self,
         request: &impl OllamaRequest,
+        headers: Option<HeaderMap>,
     ) -> Result<reqwest::Response, OllamaError> {
         let serialized =
             serde_json::to_vec(&request).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
@@ -53,6 +56,7 @@ impl OllamaClient {
         let response = self
             .cli
             .post(url)
+            .headers(headers.unwrap_or_default())
             .body(serialized)
             .send()
             .await
@@ -745,7 +749,7 @@ mod tests {
             .generate_embeddings("llama3.2:1b")
             .input("Why the sky is blue")
             .input("How are you")
-            .inputs(&vec!["haha".to_string()])
+            .inputs(&vec!["haha"])
             .await
             .unwrap();
         println!("{resp:?}");
