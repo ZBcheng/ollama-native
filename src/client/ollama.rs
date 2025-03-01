@@ -324,15 +324,16 @@ impl Ollama {
     /// # Parameters
     /// - `model`: Name of the model to pull.
     /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pulling from your own library during development.
-    /// - `stream`: (optional) If not specified (default) the response will be returned as a single response object, rather than a stream of objects.
+    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
-    /// **If `stream` is not specified (default), a single response object is returned:**
+    /// **If `stream` is not specified, a single response object is returned:**
     /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
     ///
     /// **If `stream` is specified, a stream of JSON objects is returned:**
     /// - `PullModelResponse { status: "pulling manifest" }`<br>
     /// - `PullModelResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`<br>
+    /// - `...`<br>
     /// - `PullModelResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`<br>
     /// - `PullModelResponse { status: "writing manifest", digest: None, total: None, completed: None }`<br>
     /// - `PullModelResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`<br>
