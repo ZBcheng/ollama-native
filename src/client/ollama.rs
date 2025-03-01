@@ -239,6 +239,10 @@ impl Ollama {
     }
 
     /// List models that are available locally.
+    ///
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
         Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(self.client.clone())
     }
