@@ -248,6 +248,9 @@ impl Ollama {
     }
 
     /// List models that are currently loaded into memory.
+    /// # Errors
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
     pub fn list_running_models(
         &self,
     ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
