@@ -110,7 +110,7 @@ impl Ollama {
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
-    /// ```rust
+    /// ```rust,no_run
     /// use ollama_native::Ollama;
     ///
     /// #[tokio::main]
@@ -144,7 +144,7 @@ impl Ollama {
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
-    /// ```rust
+    /// ```rust,no_run
     /// use ollama_native::{Message, Ollama};
     ///
     /// #[tokio::main]
@@ -219,20 +219,22 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     ///
     /// # Examples
-    /// ```rust
+    /// ```rust,no_run
+    /// use ollama_native::Ollama;
+    ///
+    /// #[tokio::main]
+    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    ///     let ollama = Ollama::new("http://localhost:11434");
+    ///
     ///     // Create a new model from an existing model.
     ///     let _ = ollama
     ///         .create_model("mario")
     ///         .from("llama3.1:8b")
     ///         .system("You are Mario from Super Mario Bros.")
     ///         .await?;
-    ///     
-    ///     // Quantize a non-quantized model.
-    ///     let _ = ollama
-    ///         .create_model("llama3.1:quantized")
-    ///         .from("llama3.1:8b-instruct-fp16")
-    ///         .quantize("q4_K_M")
-    ///         .await?;
+    ///
+    ///     Ok(())
+    /// }
     /// ```
     pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
         Action::<CreateModelRequest, CreateModelResponse>::new(self.client.clone(), model)
@@ -276,6 +278,26 @@ impl Ollama {
     }
 
     /// Copy a model. Creates a model with another name from an existing model.
+    ///
+    /// # Errors
+    /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
+    /// - `OllamaError::RequestError`: There is an error with the request.
+    /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    ///
+    /// # Examples
+    /// ```rust,no_run
+    /// use ollama_native::{Ollama, OllamaError};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     let ollama = Ollama::new("http://localhost:11434");
+    ///
+    ///     match ollama.copy_model("llama3.2", "llama3-backup").await {
+    ///        Ok(_) => println!("Model copied successfully"),
+    ///        Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
+    ///        Err(e) => println!("Error copying model: {e}"),
+    ///    }
+    /// }
     pub fn copy_model(
         &self,
         source: &str,
@@ -536,15 +558,15 @@ mod tests {
     #[tokio::test]
     #[ignore]
     async fn create_model_should_work() {
-        // let ollama = Ollama::new(mock_config());
-        // let resp = ollama
-        //     .create_model("yuanshen")
-        //     .from("llama3.1:8b")
-        //     .system("You are a model who is good at playing Yuanshen")
-        //     .await
-        //     .unwrap();
+        let ollama = Ollama::new(mock_config());
+        let resp = ollama
+            .create_model("yuanshen")
+            .from("llama3.1:8b")
+            .system("You are a model who is good at playing Yuanshen")
+            .await
+            .unwrap();
 
-        // println!("resp: {resp:?}");
+        println!("resp: {resp:?}");
     }
 
     #[tokio::test]
