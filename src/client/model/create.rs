@@ -17,6 +17,9 @@ use {
     tokio_stream::StreamExt,
 };
 
+#[cfg(feature = "model")]
+use crate::error::OllamaError;
+
 impl Action<CreateModelRequest, CreateModelResponse> {
     pub fn new(ollama: OllamaClient, model: &str) -> Self {
         let request = CreateModelRequest {
