@@ -5,8 +5,8 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::copy::{CopyModelRequest, CopyModelResponse},
-    action::{Action, OllamaClient},
-    error::OllamaError,
+    action::{Action, OllamaClient, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 impl Action<CopyModelRequest, CopyModelResponse> {
@@ -34,9 +34,10 @@ impl IntoFuture for Action<CopyModelRequest, CopyModelResponse> {
             match reqwest_resp.status() {
                 StatusCode::OK => Ok(CopyModelResponse::default()),
                 StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),
-                other => Err(OllamaError::UnknownError(format!(
-                    "/api/copy got unknown status code: {other}"
-                ))),
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
             }
         })
     }
