@@ -32,7 +32,7 @@ impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
         Box::pin(async move {
             let url = format!("{}{}", self.ollama.url(), self.request.path());
             let file_path = &self.request.file;
-            let reqwest_resp = upload_file(&url, file_path).await?;
+            let reqwest_resp = upload_file(self.ollama, &url, file_path).await?;
             match reqwest_resp.status() {
                 StatusCode::CREATED => Ok(PushBlobResponse::default()),
                 StatusCode::BAD_REQUEST => Err(OllamaError::UnexpectedDigest),
@@ -44,7 +44,11 @@ impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
     }
 }
 
-async fn upload_file(url: &str, file_path: &str) -> Result<reqwest::Response, OllamaError> {
+async fn upload_file(
+    ollama: OllamaClient,
+    url: &str,
+    file_path: &str,
+) -> Result<reqwest::Response, OllamaError> {
     let file = tokio::fs::File::open(file_path)
         .await
         .map_err(|e| OllamaError::FileError(e))?;
@@ -53,7 +57,8 @@ async fn upload_file(url: &str, file_path: &str) -> Result<reqwest::Response, Ol
     let stream = FramedRead::new(file, BytesCodec::new());
     let body = reqwest::Body::wrap_stream(stream);
 
-    let response = reqwest::Client::new()
+    let response = ollama
+        .cli
         .post(url)
         .body(body)
         .send()
