@@ -1,5 +1,7 @@
 use std::marker::PhantomData;
 
+use futures::future::BoxFuture;
+
 use crate::{
     abi::model::push::{PushModelRequest, PushModelResponse},
     action::{Action, OllamaClient},
@@ -33,6 +35,22 @@ impl Action<PushModelRequest, PushModelResponse> {
     pub fn insecure(mut self) -> Self {
         self.request.insecure = Some(true);
         self
+    }
+}
+
+impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
+    type Output = Result<PushModelResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'static, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
+            let response = reqwest_resp
+                .json()
+                .await
+                .map_err(|e| OllamaError::DecodingError(e))?;
+            Ok(response)
+        })
     }
 }
 
