@@ -1,5 +1,8 @@
 use std::marker::PhantomData;
 
+use futures::future::BoxFuture;
+use reqwest::StatusCode;
+
 #[cfg(feature = "stream")]
 use {
     crate::action::{IntoStream, OllamaStream},
@@ -11,7 +14,8 @@ use {
 
 use crate::{
     abi::model::pull::{PullModelRequest, PullModelResponse},
-    action::{Action, OllamaClient},
+    action::{Action, OllamaClient, parse_response},
+    error::ServerError,
 };
 
 impl Action<PullModelRequest, PullModelResponse> {
@@ -33,6 +37,24 @@ impl Action<PullModelRequest, PullModelResponse> {
     pub fn insecure(mut self) -> Self {
         self.request.insecure = Some(true);
         self
+    }
+}
+
+impl IntoFuture for Action<PullModelRequest, PullModelResponse> {
+    type Output = Result<PullModelResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'static, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
+            }
+        })
     }
 }
 
