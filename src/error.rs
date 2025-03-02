@@ -1,3 +1,4 @@
+use serde::Deserialize;
 use thiserror::Error;
 
 #[derive(Debug, Error)]
@@ -14,6 +15,9 @@ pub enum OllamaError {
 
     #[error("invalid format: {0}")]
     InvalidFormat(String),
+
+    #[error("ollama error: {0}")]
+    ServerError(String),
 
     #[cfg(feature = "model")]
     #[error("model does not exist")]
@@ -33,4 +37,15 @@ pub enum OllamaError {
 
     #[error("unknown error: {0}")]
     UnknownError(String),
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ServerError {
+    pub error: String,
+}
+
+impl From<ServerError> for OllamaError {
+    fn from(err: ServerError) -> Self {
+        OllamaError::ServerError(err.error)
+    }
 }
