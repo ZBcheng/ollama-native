@@ -5,7 +5,7 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::copy::{CopyModelRequest, CopyModelResponse},
-    client::{Action, ollama::OllamaClient},
+    action::{Action, OllamaClient},
     error::OllamaError,
 };
 

@@ -5,7 +5,7 @@ use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 
 #[cfg(feature = "stream")]
 use {
-    crate::client::{IntoStream, OllamaStream},
+    crate::action::{IntoStream, OllamaStream},
     async_stream::stream,
     async_trait::async_trait,
     tokio_stream::StreamExt,
@@ -16,7 +16,7 @@ use crate::{
         chat::Format,
         generate::{GenerateRequest, GenerateResponse},
     },
-    client::{Action, ollama::OllamaClient},
+    action::{Action, OllamaClient},
     error::OllamaError,
 };
 

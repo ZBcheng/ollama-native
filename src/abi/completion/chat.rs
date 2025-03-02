@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
     abi::{Message, Parameter, Role},
-    client::OllamaRequest,
+    action::OllamaRequest,
 };
 
 #[derive(Debug, Clone, Default, Serialize)]

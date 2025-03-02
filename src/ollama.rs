@@ -1,16 +1,9 @@
-use std::sync::Arc;
-
-use reqwest::header::HeaderMap;
-
-use crate::abi::completion::{
-    chat::{ChatRequest, ChatResponse},
-    generate::{GenerateRequest, GenerateResponse},
+use crate::abi::{
+    completion::{ChatRequest, ChatResponse, GenerateRequest, GenerateResponse},
+    version::{VersionRequest, VersionResponse},
 };
-use crate::abi::version::{VersionRequest, VersionResponse};
+use crate::action::{Action, OllamaClient};
 use crate::config::OllamaConfig;
-use crate::error::OllamaError;
-
-use super::{Action, OllamaRequest};
 
 #[cfg(feature = "model")]
 use crate::abi::model::{
@@ -27,63 +20,10 @@ use crate::abi::model::{
     show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
 };
 
-#[derive(Clone)]
-pub struct OllamaClient {
-    pub cli: reqwest::Client,
-    pub config: Arc<OllamaConfig>,
-}
-
-impl OllamaClient {
-    pub fn new(config: OllamaConfig) -> Self {
-        let cli = reqwest::Client::new();
-        let config = Arc::new(config);
-        Self { cli, config }
-    }
-
-    pub fn url(&self) -> String {
-        self.config.url.to_string()
-    }
-
-    pub async fn post(
-        &self,
-        request: &impl OllamaRequest,
-        headers: Option<HeaderMap>,
-    ) -> Result<reqwest::Response, OllamaError> {
-        let serialized =
-            serde_json::to_vec(&request).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
-
-        let url = format!("{}{}", self.config.url, request.path());
-        let response = self
-            .cli
-            .post(url)
-            .headers(headers.unwrap_or_default())
-            .body(serialized)
-            .send()
-            .await
-            .map_err(|e| OllamaError::RequestError(e))?;
-        Ok(response)
-    }
-
-    pub async fn get(
-        &self,
-        request: &impl OllamaRequest,
-    ) -> Result<reqwest::Response, OllamaError> {
-        let url = format!("{}{}", self.config.url, request.path());
-        let response = self
-            .cli
-            .get(url)
-            .send()
-            .await
-            .map_err(|e| OllamaError::RequestError(e))?;
-        Ok(response)
-    }
-}
-
 pub struct Ollama {
     client: OllamaClient,
 }
 
-// Default feature
 impl Ollama {
     pub fn new(url: &str) -> Self {
         let config = OllamaConfig::from_url(url);
@@ -468,8 +408,9 @@ mod tests {
     use tokio_stream::StreamExt;
 
     use crate::{
+        Ollama,
         abi::Message,
-        client::{IntoStream, OllamaStream, ollama::Ollama},
+        action::{IntoStream, OllamaStream},
     };
 
     #[tokio::test]
@@ -492,12 +433,11 @@ mod tests {
 
         let mut out = stdout();
         while let Some(item) = s.next().await {
-            out.write_all(item.unwrap().response.as_bytes())
-                .await
-                .unwrap();
+            out.write(item.unwrap().response.as_bytes()).await.unwrap();
+            out.flush().await.unwrap();
         }
 
-        out.write_all(b"\n").await.unwrap();
+        out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 
@@ -533,12 +473,12 @@ mod tests {
 
         let mut out = stdout();
         while let Some(item) = s.next().await {
-            out.write_all(item.unwrap().message.unwrap().content.as_bytes())
-                .await
-                .unwrap();
+            let content = item.unwrap().message.unwrap().content;
+            out.write(content.as_bytes()).await.unwrap();
+            out.flush().await.unwrap();
         }
 
-        out.write_all(b"\n").await.unwrap();
+        out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 
@@ -785,15 +725,16 @@ mod tests {
             match item {
                 Ok(item) => {
                     let serialized = serde_json::to_string(&item).unwrap();
-                    out.write_all(format!("{}\n", serialized).as_bytes())
+                    out.write(format!("{}\n", serialized).as_bytes())
                         .await
                         .unwrap();
+                    out.flush().await.unwrap();
                 }
                 Err(e) => panic!("{}", e),
             }
         }
 
-        out.write_all(b"\n").await.unwrap();
+        out.write(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 }

@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{abi::Parameter, client::OllamaRequest};
+use crate::{abi::Parameter, action::OllamaRequest};
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]

@@ -1,7 +1,7 @@
 use ollama_native::{
     Message, Ollama,
     abi::completion::chat::ChatResponse,
-    client::{IntoStream, OllamaStream},
+    action::{IntoStream, OllamaStream},
 };
 use tokio::io::AsyncWriteExt;
 use tokio_stream::StreamExt;

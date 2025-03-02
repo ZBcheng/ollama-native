@@ -3,23 +3,23 @@ use std::marker::PhantomData;
 use futures::future::BoxFuture;
 
 use crate::{
-    abi::model::list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
-    client::{Action, ollama::OllamaClient},
+    abi::version::version::{VersionRequest, VersionResponse},
+    action::{Action, OllamaClient},
     error::OllamaError,
 };
 
-impl Action<ListRunningModelsRequest, ListRunningModelsResponse> {
+impl Action<VersionRequest, VersionResponse> {
     pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
-            request: ListRunningModelsRequest::default(),
+            request: VersionRequest::default(),
             _resp: PhantomData,
         }
     }
 }
 
-impl IntoFuture for Action<ListRunningModelsRequest, ListRunningModelsResponse> {
-    type Output = Result<ListRunningModelsResponse, OllamaError>;
+impl IntoFuture for Action<VersionRequest, VersionResponse> {
+    type Output = Result<VersionResponse, OllamaError>;
     type IntoFuture = BoxFuture<'static, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {

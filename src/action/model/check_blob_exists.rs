@@ -5,7 +5,7 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
-    client::{Action, OllamaRequest, ollama::OllamaClient},
+    action::{Action, OllamaClient, OllamaRequest},
     error::OllamaError,
 };
 

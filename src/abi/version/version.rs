@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::client::OllamaRequest;
+use crate::action::OllamaRequest;
 
 #[derive(Debug, Clone, Default, Serialize)]
 pub struct VersionRequest {}

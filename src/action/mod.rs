@@ -1,0 +1,87 @@
+pub mod completion;
+pub mod version;
+
+#[cfg(feature = "model")]
+pub mod model;
+
+use std::{marker::PhantomData, sync::Arc};
+
+use reqwest::header::HeaderMap;
+use serde::Serialize;
+
+use crate::config::OllamaConfig;
+use crate::error::OllamaError;
+
+#[cfg(feature = "stream")]
+use {async_trait::async_trait, futures::Stream, std::pin::Pin};
+
+#[derive(Clone)]
+pub struct OllamaClient {
+    pub cli: reqwest::Client,
+    pub config: Arc<OllamaConfig>,
+}
+
+impl OllamaClient {
+    pub fn new(config: OllamaConfig) -> Self {
+        let cli = reqwest::Client::new();
+        let config = Arc::new(config);
+        Self { cli, config }
+    }
+
+    pub fn url(&self) -> String {
+        self.config.url.to_string()
+    }
+
+    pub async fn post(
+        &self,
+        request: &impl OllamaRequest,
+        headers: Option<HeaderMap>,
+    ) -> Result<reqwest::Response, OllamaError> {
+        let serialized =
+            serde_json::to_vec(&request).map_err(|e| OllamaError::InvalidFormat(e.to_string()))?;
+
+        let url = format!("{}{}", self.config.url, request.path());
+        let response = self
+            .cli
+            .post(url)
+            .headers(headers.unwrap_or_default())
+            .body(serialized)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(response)
+    }
+
+    pub async fn get(
+        &self,
+        request: &impl OllamaRequest,
+    ) -> Result<reqwest::Response, OllamaError> {
+        let url = format!("{}{}", self.config.url, request.path());
+        let response = self
+            .cli
+            .get(url)
+            .send()
+            .await
+            .map_err(|e| OllamaError::RequestError(e))?;
+        Ok(response)
+    }
+}
+
+pub struct Action<Request: OllamaRequest, Response> {
+    pub ollama: OllamaClient,
+    pub request: Request,
+    pub _resp: PhantomData<Response>,
+}
+
+#[cfg(feature = "stream")]
+pub type OllamaStream<T> = Pin<Box<dyn Stream<Item = Result<T, OllamaError>>>>;
+
+#[cfg(feature = "stream")]
+#[async_trait]
+pub trait IntoStream<Response> {
+    async fn stream(mut self) -> Result<OllamaStream<Response>, OllamaError>;
+}
+
+pub trait OllamaRequest: Serialize + Send + Sync + 'static {
+    fn path(&self) -> String;
+}

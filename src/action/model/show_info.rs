@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 
 use crate::{
     abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
-    client::{Action, ollama::OllamaClient},
+    action::{Action, OllamaClient},
     error::OllamaError,
 };
 

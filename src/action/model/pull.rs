@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 #[cfg(feature = "stream")]
 use {
-    crate::client::{IntoStream, OllamaStream},
+    crate::action::{IntoStream, OllamaStream},
     crate::error::OllamaError,
     async_stream::stream,
     async_trait::async_trait,
@@ -11,7 +11,7 @@ use {
 
 use crate::{
     abi::model::pull::{PullModelRequest, PullModelResponse},
-    client::{Action, ollama::OllamaClient},
+    action::{Action, OllamaClient},
 };
 
 impl Action<PullModelRequest, PullModelResponse> {

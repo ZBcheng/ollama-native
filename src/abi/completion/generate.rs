@@ -2,7 +2,7 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{abi::Parameter, client::OllamaRequest};
+use crate::{abi::Parameter, action::OllamaRequest};
 
 use super::chat::Format;
 

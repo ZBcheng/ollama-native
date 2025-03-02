@@ -5,7 +5,7 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::push_blob::{PushBlobRequest, PushBlobResponse},
-    client::{Action, OllamaRequest, ollama::OllamaClient},
+    action::{Action, OllamaClient, OllamaRequest},
     error::OllamaError,
 };
 

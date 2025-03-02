@@ -6,11 +6,11 @@ use crate::abi::{
     Message,
     model::create::{CreateModelRequest, CreateModelResponse},
 };
-use crate::client::{Action, OllamaClient};
+use crate::action::{Action, OllamaClient};
 
 #[cfg(feature = "stream")]
 use {
-    crate::client::{IntoStream, OllamaStream},
+    crate::action::{IntoStream, OllamaStream},
     async_stream::stream,
     async_trait::async_trait,
     tokio_stream::StreamExt,

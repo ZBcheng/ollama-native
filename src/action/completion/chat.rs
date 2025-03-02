@@ -1,17 +1,28 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
+use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 
-use crate::{
-    abi::model::generate_embeddings::{GenerateEmbeddingsRequest, GenerateEmbeddingsResponse},
-    client::{Action, ollama::OllamaClient},
-    error::OllamaError,
+use crate::abi::{
+    Message,
+    completion::chat::{ChatRequest, ChatResponse, Format, Tool},
+};
+use crate::action::{Action, OllamaClient};
+use crate::error::OllamaError;
+
+#[cfg(feature = "stream")]
+use {
+    crate::action::{IntoStream, OllamaStream},
+    async_stream::stream,
+    async_trait::async_trait,
+    tokio_stream::StreamExt,
 };
 
-impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
+impl Action<ChatRequest, ChatResponse> {
     pub fn new(ollama: OllamaClient, model: &str) -> Self {
-        let request = GenerateEmbeddingsRequest {
+        let request = ChatRequest {
             model: model.to_string(),
+            messages: vec![],
             ..Default::default()
         };
 
@@ -21,27 +32,58 @@ impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
             _resp: PhantomData,
         }
     }
+}
 
-    /// Text to generate embeddings for.
-    pub fn input(mut self, input: &str) -> Self {
-        self.request.input.push(input.to_string());
-        self
-    }
-
-    /// List of text to generate embeddings for.
-    pub fn inputs(mut self, inputs: &Vec<impl ToString>) -> Self {
-        inputs
+impl Action<ChatRequest, ChatResponse> {
+    pub fn messages(mut self, messages: &Vec<Message>) -> Self {
+        messages
             .iter()
-            .for_each(|input| self.request.input.push(input.to_string()));
+            .for_each(|m| self.request.messages.push(m.to_owned()));
         self
     }
 
-    /// Truncates the end of each input to fit within context length.
-    /// Returns error if `false` and context length is exceeded. Defaults to `true`.
-    pub fn truncate(mut self, truncate: bool) -> Self {
-        if truncate == false {
-            self.request.truncate = Some(false);
-        }
+    pub fn message(mut self, message: &Message) -> Self {
+        self.request.messages.push(message.clone());
+        self
+    }
+
+    pub fn system_message(mut self, content: &str) -> Self {
+        self.request.messages.push(Message::new_system(content));
+        self
+    }
+
+    pub fn user_message(mut self, content: &str) -> Self {
+        self.request.messages.push(Message::new_user(content));
+        self
+    }
+
+    pub fn assistant_message(mut self, content: &str) -> Self {
+        self.request.messages.push(Message::new_assistant(content));
+        self
+    }
+
+    /// Tool in JSON for the model to use if supported.
+    pub fn tool(mut self, tool: &str) -> Self {
+        self.request.tools.push(Tool::Tool(tool.to_string()));
+        self
+    }
+
+    /// List of tools in JSON for the model to use if supported.
+    pub fn tools(mut self, tools: Vec<&str>) -> Self {
+        self.request.tools = tools
+            .into_iter()
+            .map(|t| Tool::Tool(t.to_string()))
+            .collect();
+        self
+    }
+
+    /// Return a response in JSON format.
+    pub fn format(mut self, format: &str) -> Self {
+        let fmt = match format.to_lowercase().as_str() {
+            "json" => Format::Json,
+            _ => Format::Schema(format.to_string()),
+        };
+        self.request.format = Some(fmt);
         self
     }
 
@@ -154,18 +196,50 @@ impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
     }
 }
 
-impl IntoFuture for Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
-    type Output = Result<GenerateEmbeddingsResponse, OllamaError>;
+impl IntoFuture for Action<ChatRequest, ChatResponse> {
+    type Output = Result<ChatResponse, OllamaError>;
     type IntoFuture = BoxFuture<'static, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let reqwest_resp = self.ollama.post(&self.request, None).await?;
-            let response = reqwest_resp
+            let headers = match self.request.format {
+                Some(_) => {
+                    let mut headers = HeaderMap::new();
+                    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                    Some(headers)
+                }
+                None => None,
+            };
+
+            let reqwest_resp = self.ollama.post(&self.request, headers).await?;
+            let content = reqwest_resp
                 .json()
                 .await
                 .map_err(|e| OllamaError::DecodingError(e))?;
-            Ok(response)
+            Ok(content)
         })
+    }
+}
+
+#[cfg(feature = "stream")]
+#[async_trait]
+impl IntoStream<ChatResponse> for Action<ChatRequest, ChatResponse> {
+    async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
+        self.request.stream = true;
+
+        let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
+
+        let s = stream! {
+            while let Some(item) = reqwest_stream.next().await {
+                match item {
+                    Ok(chunk) => match serde_json::from_slice(&chunk) {
+                        Ok(r) => yield Ok(r),
+                        Err(e) => yield Err(OllamaError::StreamDecodingError(e.to_string())),
+                    }
+                    Err(e) => yield Err(OllamaError::DecodingError(e))
+                }
+            };
+        };
+        Ok(Box::pin(s))
     }
 }

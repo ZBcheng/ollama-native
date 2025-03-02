@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use serde::{Deserialize, Serialize};
 
 use crate::abi::{Message, Parameter};
-use crate::client::OllamaRequest;
+use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Default)]
