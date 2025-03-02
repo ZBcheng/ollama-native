@@ -5,8 +5,8 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::delete::{DeleteModelRequest, DeleteModelResponse},
-    action::{Action, OllamaClient, OllamaRequest},
-    error::OllamaError,
+    action::{Action, OllamaClient, OllamaRequest, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 impl Action<DeleteModelRequest, DeleteModelResponse> {
@@ -41,13 +41,13 @@ impl IntoFuture for Action<DeleteModelRequest, DeleteModelResponse> {
                 .await
                 .map_err(|e| OllamaError::RequestError(e))?;
 
-            // Returns a 200 OK if successful, 404 Not Found if the model to be deleted doesn't exist.
             match reqwest_resp.status() {
                 StatusCode::OK => Ok(DeleteModelResponse::default()),
                 StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),
-                other => Err(OllamaError::UnknownError(format!(
-                    "/api/delete got unknown status code: {other}"
-                ))),
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
             }
         })
     }
