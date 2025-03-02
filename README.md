@@ -5,9 +5,9 @@ ollama-native is a minimalist Ollama Rust SDK that provides the most basic funct
 - ✅ Provide access to the core [Ollama API][ollama-api-doc] functions for interacting with models.
 - ❌ The project does not include any business-specific functionality like _**chat with history**_.
 
-For users who need features like chat with history, these functionalities can be implemented at the business layer of your application. Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
+For users who need features like chat with history, these functionalities can be implemented at the business layer of your application ([chat-with-history-example][chat-with-history]). Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
 
-## Features
+## Features 🧬
 - **Minimal Functionality**: Offers the core functionalities of Ollama without extra features or complexity.
 - **Rusty APIs**: Utilizes chainable methods, making the API simple, concise, and idiomatic to Rust.
 
@@ -86,7 +86,7 @@ let stream = ollama
 </td></tr>
 </tbody></table>
 
-## Usage Examples
+## Usage Examples 🔦
 
 ### Generate a completion
 ```rust
@@ -120,9 +120,11 @@ let mut stream = ollama
 
 let mut out = tokio::io::stdout();
 while let Some(Ok(item)) = stream.next().await {
-    out.write(item.response.as_bytes()).await?;
-    out.flush().await?;
+    out.write_all(item.response.as_bytes()).await?;
 }
+
+out.write_all(b"\n").await?;
+out.flush().await?;
 ```
 
 ### Structured Ouput
@@ -164,7 +166,7 @@ let resposne = ollama
     .await?;
 ```
 
-## APIs
+## APIs 📝
 - [x] Generate a completion
 - [x] Generate a chat completion
 - [x] Create a Model
@@ -179,15 +181,15 @@ let resposne = ollama
 - [x] Check if a Blob Exists
 - [x] Push a Blob
 
-## Examples
+## Examples 📖
 - [x] [Generate Completions][generate-completion]
 - [x] [Generate Chat Completions (Streaming)][chat-request-stream]
 - [x] [Generate Chat Completions with Images][chat-with-images]
 - [x] [Generate Embeddings][generate-embeddings]
-- [x] [Structured Outputs (JSON)][structured-outputs-example]
-- [ ] Chat with History
+- [x] [Structured Outputs (JSON)][structured-outputs]
+- [x] [Chat with History][chat-with-history]
 
-## License
+## License 📄
 This project is licensed under the [MIT license][license].
 
 [examples]: https://github.com/ZBcheng/ollama-native/tree/main/examples
@@ -195,6 +197,7 @@ This project is licensed under the [MIT license][license].
 [chat-request-stream]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_request_stream.rs
 [chat-with-images]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_with_images.rs
 [generate-embeddings]: https://github.com/ZBcheng/ollama-native/blob/main/examples/generate_embeddings.rs
-[structured-outputs-example]: https://github.com/ZBcheng/ollama-native/blob/main/examples/structured_outputs.rs
+[structured-outputs]: https://github.com/ZBcheng/ollama-native/blob/main/examples/structured_outputs.rs
+[chat-with-history]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_with_history.rs
 [ollama-api-doc]: https://github.com/ollama/ollama/blob/main/docs/api.md
 [license]: https://github.com/ZBcheng/ollama-native/blob/main/LICENSE
