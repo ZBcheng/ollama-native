@@ -40,9 +40,3 @@ pub enum OllamaError {
 pub struct ServerError {
     pub error: String,
 }
-
-impl From<ServerError> for OllamaError {
-    fn from(err: ServerError) -> Self {
-        OllamaError::ServerError(err.error)
-    }
-}
