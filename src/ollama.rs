@@ -25,6 +25,17 @@ pub struct Ollama {
 }
 
 impl Ollama {
+    /// Creates a new Ollama client.
+    ///
+    /// # Parameters
+    /// - `url`: The URL of the Ollama server, e.g., "http://localhost:11434"
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// use ollama_native::Ollama;
+    ///
+    /// let ollama = Ollama::new("http://localhost:11434");
+    /// ```
     pub fn new(url: &str) -> Self {
         let config = OllamaConfig::from_url(url);
         let client = OllamaClient::new(config);
@@ -53,17 +64,24 @@ impl Ollama {
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
+    /// Basic usage.
     /// ```rust,no_run
-    /// use ollama_native::Ollama;
+    /// let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
+    /// ```
+    /// Streaming response.
+    /// ```rust,no_run
+    /// use ollama_native::action::IntoStream;
     ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let ollama = Ollama::new("http://localhost:11434");
-    ///
-    ///     let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
-    ///     println!("{}", response.response);
-    ///     Ok(())
-    /// }
+    /// let stream = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").stream().await?;
+    /// ```
+    /// With additional parameters.
+    /// ```rust,no_run
+    /// let response = ollama
+    ///     .generate("llama3.1:8b", "Tell me a joke about sharks")
+    ///     .format("json") // Specify the format of the response
+    ///     .seed(42) // Set the seed for the model
+    ///     .await?;
+    /// ```
     pub fn generate(&self, model: &str, prompt: &str) -> Action<GenerateRequest, GenerateResponse> {
         Action::<GenerateRequest, GenerateResponse>::new(self.client.clone(), model, prompt)
     }
@@ -87,39 +105,27 @@ impl Ollama {
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     ///
     /// # Examples
+    /// Generate a completion in json format.
     /// ```rust,no_run
-    /// use ollama_native::{Message, Ollama};
+    /// let response = ollama
+    ///     .chat("llama3.1:8b")
+    ///     .system_message("You are a robot who likes to tell jokes")
+    ///     .user_message("Who are you?")
+    ///     .format("json")
+    ///     .await?;
+    /// ```
+    /// Or use a Vec of messages.
+    /// ```rust,no_run
+    /// let messages = vec![
+    ///     Message::new_system("You are a robot who likes to tell jokes"),
+    ///     Message::new_user("Who are you?"),
+    /// ];
     ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let ollama = Ollama::new("http://localhost:11434");
-    ///     
-    ///     // Generate a completion in json format.
-    ///     let response = ollama
-    ///         .chat("llama3.1:8b")
-    ///         .system_message("You are a robot who likes to tell jokes")
-    ///         .user_message("Who are you?")
-    ///         .format("json")
-    ///         .await?;
-    ///
-    ///     println!("{}", response.message.unwrap().content);
-    ///
-    ///     // Or use a Vec of messages.
-    ///     let messages = vec![
-    ///         Message::new_system("You are a robot who likes to tell jokes"),
-    ///         Message::new_user("Who are you?"),
-    ///     ];
-    ///
-    ///     let response = ollama
-    ///         .chat("llama3.1:8b")
-    ///         .messages(&messages)
-    ///         .format("json")
-    ///         .await?;
-    ///
-    ///     println!("{}", response.message.unwrap().content);
-    ///
-    ///     Ok(())
-    /// }
+    /// let stream = ollama
+    ///     .chat("llama3.1:8b")
+    ///     .messages(messages)
+    ///     .await?;
+    /// ```
     pub fn chat(&self, model: &str) -> Action<ChatRequest, ChatResponse> {
         Action::<ChatRequest, ChatResponse>::new(self.client.clone(), model)
     }
@@ -129,6 +135,12 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let version = ollama.version().await?;
+    /// println!("{}", version.version);
+    /// ```
     pub fn version(&self) -> Action<VersionRequest, VersionResponse> {
         Action::<VersionRequest, VersionResponse>::new(self.client.clone())
     }
@@ -163,22 +175,21 @@ impl Ollama {
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     ///
     /// # Examples
+    /// Create a new model from an existing model.
     /// ```rust,no_run
-    /// use ollama_native::Ollama;
-    ///
-    /// #[tokio::main]
-    /// async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    ///     let ollama = Ollama::new("http://localhost:11434");
-    ///
-    ///     // Create a new model from an existing model.
-    ///     let _ = ollama
-    ///         .create_model("mario")
-    ///         .from("llama3.1:8b")
-    ///         .system("You are Mario from Super Mario Bros.")
-    ///         .await?;
-    ///
-    ///     Ok(())
-    /// }
+    /// let _ = ollama
+    ///     .create_model("mario")
+    ///     .from("llama3.1:8b")
+    ///     .system("You are Mario from Super Mario Bros.")
+    ///     .await?;
+    /// ```
+    /// Quantize a model.
+    /// ```rust,no_run
+    /// let _ = ollama
+    ///     .create_model("llama3.1:quantized")
+    ///     .from("llama3.1:8b-instruct-fp16")
+    ///     .quantize("q4_K_M")
+    ///     .await?;
     /// ```
     pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
         Action::<CreateModelRequest, CreateModelResponse>::new(self.client.clone(), model)
@@ -190,6 +201,14 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let models = ollama.list_local_models().await?;
+    /// for model in models {
+    ///     println!("{}", model.name);
+    /// }
+    /// ```
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
         Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(self.client.clone())
     }
@@ -199,6 +218,14 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let models = ollama.list_running_models().await?;
+    /// for model in models {
+    ///     println!("{}", model.name);
+    /// }
+    /// ```
     pub fn list_running_models(
         &self,
     ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
@@ -214,6 +241,12 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let model_info = ollama.show_model_information("llama3.1:8b").await?;
+    /// println!("{}", model_info.license);
+    /// ```
     pub fn show_model_information(
         &self,
         model: &str,
@@ -232,20 +265,14 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     ///
-    /// # Examples
+    /// # Example
     /// ```rust,no_run
-    /// use ollama_native::{Ollama, OllamaError};
-    ///
-    /// #[tokio::main]
-    /// async fn main() {
-    ///     let ollama = Ollama::new("http://localhost:11434");
-    ///
-    ///     match ollama.copy_model("llama3.2", "llama3-backup").await {
-    ///        Ok(_) => println!("Model copied successfully"),
-    ///        Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
-    ///        Err(e) => println!("Error copying model: {e}"),
-    ///    }
+    /// match ollama.copy_model("llama3.2", "llama3-backup").await {
+    ///     Ok(_) => println!("Model copied successfully"),
+    ///     Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
+    ///     Err(e) => println!("Error copying model: {e}"),
     /// }
+    /// ```
     pub fn copy_model(
         &self,
         source: &str,
@@ -263,6 +290,15 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// match ollama.delete_model("llama3-backup").await {
+    ///     Ok(_) => println!("Model deleted successfully"),
+    ///     Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
+    ///     Err(e) => println!("Error deleting model: {e}"),
+    /// }
+    /// ```
     pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
         Action::<DeleteModelRequest, DeleteModelResponse>::new(self.client.clone(), model)
     }
@@ -293,6 +329,26 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// use ollama_native::action::IntoStream;
+    ///
+    /// use tokio::io::AsyncWriteExt;
+    /// use tokio_stream::StreamExt;
+    ///
+    /// let mut stream = ollama.pull_model("llama3.2:1b").stream().await?;
+    /// let mut out = tokio::io::stdout();
+    ///
+    /// while let Some(Ok(item)) = resp.next().await {
+    ///     let serialized = serde_json::to_string(&item)?;
+    ///     out.write(format!("{}\n", serialized).as_bytes()).await?
+    ///     out.flush().await?;
+    /// }
+    ///
+    /// out.write(b"\n").await?;
+    /// out.flush().await?;
+    /// ```
     pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
         Action::<PullModelRequest, PullModelResponse>::new(self.client.clone(), model)
     }
@@ -320,6 +376,11 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let resp = ollama.push_model("mattw/pygmalion:latest").await?;
+    /// ```
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
         Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
     }
@@ -361,6 +422,15 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let resp = ollama.
+    ///     generate_embeddings("all-minilm")
+    ///     .input("Tell me a joke about sharks")
+    ///     .input("About tiger sharks")
+    ///     .await?;
+    /// ```
     pub fn generate_embeddings(
         &self,
         model: &str,
@@ -385,6 +455,15 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// match ollama.check_blob_exists("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab").await {
+    ///     Ok(_) => println!("Blob exists"),
+    ///     Err(OllamaError::BlobDoesNotExist) => println!("Blob does not exist"),
+    ///     Err(e) => println!("Error checking blob: {e}"),
+    /// }
+    /// ```
     pub fn check_blob_exists(
         &self,
         digest: &str,
@@ -406,6 +485,16 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    ///
+    /// # Example
+    /// ```rust,no_run
+    /// let _ = ollama
+    ///     .push_blob(
+    ///         "model.gguf",
+    ///         "sha256:29fdb92e57cf0827ded04ae6461b5931d01fa595843f55d36f5b275a52087dd2",
+    ///     )
+    ///     .await?;
+    /// ```
     pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
         Action::<PushBlobRequest, PushBlobResponse>::new(self.client.clone(), file, digest)
     }
@@ -695,7 +784,6 @@ mod tests {
             .generate_embeddings("llama3.2:1b")
             .input("Why the sky is blue")
             .input("How are you")
-            .inputs(&vec!["haha"])
             .await
             .unwrap();
         println!("{resp:?}");
@@ -717,7 +805,13 @@ mod tests {
     #[tokio::test]
     async fn push_blob_should_work() {
         let ollama = Ollama::new(mock_config());
-        let _ = ollama.push_blob("xx", "digest:lxlkc").await.unwrap();
+        let _ = ollama
+            .push_blob(
+                "model.gguf",
+                "sha256:29fdb92e57cf0827ded04ae6461b5931d01fa595843f55d36f5b275a52087dd2",
+            )
+            .await
+            .unwrap();
     }
 
     fn mock_config() -> &'static str {
@@ -725,7 +819,7 @@ mod tests {
     }
 
     async fn print_stream<T: Serialize>(mut resp: OllamaStream<T>) {
-        let mut out = stdout();
+        let mut out = tokio::io::stdout();
 
         while let Some(item) = resp.next().await {
             match item {
