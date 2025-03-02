@@ -44,9 +44,9 @@ impl Action<ChatRequest, ChatResponse> {
 }
 
 impl Action<ChatRequest, ChatResponse> {
-    pub fn messages(mut self, messages: &Vec<Message>) -> Self {
+    pub fn messages(mut self, messages: Vec<Message>) -> Self {
         messages
-            .iter()
+            .into_iter()
             .for_each(|m| self.request.messages.push(m.to_owned()));
         self
     }
@@ -78,7 +78,7 @@ impl Action<ChatRequest, ChatResponse> {
     }
 
     /// List of tools in JSON for the model to use if supported.
-    pub fn tools(mut self, tools: Vec<&str>) -> Self {
+    pub fn tools(mut self, tools: Vec<impl ToString>) -> Self {
         self.request.tools = tools
             .into_iter()
             .map(|t| Tool::Tool(t.to_string()))

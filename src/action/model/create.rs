@@ -93,8 +93,10 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     }
 
     /// A list of strings containing the license or licenses for the model.
-    pub fn license(mut self, license: Vec<String>) -> Self {
-        self.request.license = license;
+    pub fn license(mut self, license: Vec<impl ToString>) -> Self {
+        license
+            .into_iter()
+            .for_each(|l| self.request.license.push(l.to_string()));
         self
     }
 
@@ -106,7 +108,9 @@ impl Action<CreateModelRequest, CreateModelResponse> {
 
     /// A list of message objects used to create a conversation.
     pub fn messages(mut self, messages: Vec<Message>) -> Self {
-        self.request.messages = messages;
+        messages
+            .into_iter()
+            .for_each(|m| self.request.messages.push(m));
         self
     }
 

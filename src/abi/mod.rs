@@ -69,9 +69,11 @@ impl Message {
         }
     }
 
-    pub fn images(mut self, images: Vec<String>) -> Self {
+    pub fn images(mut self, images: Vec<impl ToString>) -> Self {
         let mut cur_images = self.images.unwrap_or_default();
-        images.into_iter().for_each(|img| cur_images.push(img));
+        images
+            .into_iter()
+            .for_each(|img| cur_images.push(img.to_string()));
         self.images = Some(cur_images);
         self
     }

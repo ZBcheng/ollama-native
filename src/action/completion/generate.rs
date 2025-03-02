@@ -47,10 +47,10 @@ impl Action<GenerateRequest, GenerateResponse> {
     }
 
     /// A list of base64-encoded images (for multimodal models such as `llava`).
-    pub fn images(mut self, images: Vec<String>) -> Self {
+    pub fn images(mut self, images: Vec<impl ToString>) -> Self {
         images
             .into_iter()
-            .for_each(|img| self.request.images.push(img));
+            .for_each(|img| self.request.images.push(img.to_string()));
         self
     }
 
