@@ -15,7 +15,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let inputs = vec!["Why the sky is blue?", "Why the sea is salty?"];
     let response = ollama
         .generate_embeddings("llama3.1:8b")
-        .inputs(&inputs)
+        .inputs(inputs)
         .seed(5) // Set seed to 5.
         .min_p(3.2) // Set min_p to 3.2.
         .await?;

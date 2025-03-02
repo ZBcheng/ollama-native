@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let stream = ollama
         .chat("llama3.1:8b")
-        .messages(&messages)
+        .messages(messages)
         .stream() // Specify that we want to stream the responses.
         .await?;
 

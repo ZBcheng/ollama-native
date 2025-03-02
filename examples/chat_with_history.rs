@@ -22,7 +22,7 @@ impl Manager {
         let mut stream = self
             .ollama
             .chat(&self.model)
-            .messages(&history)
+            .messages(history)
             .user_message(input)
             .stream()
             .await?;
