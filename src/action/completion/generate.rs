@@ -1,7 +1,10 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
-use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
+use reqwest::{
+    StatusCode,
+    header::{CONTENT_TYPE, HeaderMap, HeaderValue},
+};
 
 #[cfg(feature = "stream")]
 use {
@@ -16,8 +19,8 @@ use crate::{
         chat::Format,
         generate::{GenerateRequest, GenerateResponse},
     },
-    action::{Action, OllamaClient},
-    error::OllamaError,
+    action::{Action, OllamaClient, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 impl Action<GenerateRequest, GenerateResponse> {
@@ -200,20 +203,22 @@ impl IntoFuture for Action<GenerateRequest, GenerateResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let headers = match self.request.format {
-                Some(_) => {
-                    let mut headers = HeaderMap::new();
-                    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-                    Some(headers)
-                }
-                None => None,
+            let headers = if let Some(_) = self.request.format {
+                let mut headers = HeaderMap::new();
+                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                Some(headers)
+            } else {
+                None
             };
+
             let reqwest_resp = self.ollama.post(&self.request, headers).await?;
-            let response = reqwest_resp
-                .json()
-                .await
-                .map_err(|e| OllamaError::DecodingError(e))?;
-            Ok(response)
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
+            }
         })
     }
 }
