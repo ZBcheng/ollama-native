@@ -3,10 +3,11 @@ use std::marker::PhantomData;
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
+use crate::error::OllamaError;
+
 #[cfg(feature = "stream")]
 use {
     crate::action::{IntoStream, OllamaStream},
-    crate::error::OllamaError,
     async_stream::stream,
     async_trait::async_trait,
     tokio_stream::StreamExt,
