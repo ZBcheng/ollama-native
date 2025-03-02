@@ -1,14 +1,23 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
-use reqwest::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
-
-use crate::abi::{
-    Message,
-    completion::chat::{ChatRequest, ChatResponse, Format, Tool},
+use reqwest::{
+    StatusCode,
+    header::{CONTENT_TYPE, HeaderMap, HeaderValue},
 };
-use crate::action::{Action, OllamaClient};
+
 use crate::error::OllamaError;
+use crate::{
+    abi::{
+        Message,
+        completion::chat::{ChatRequest, ChatResponse, Format, Tool},
+    },
+    action::parse_response,
+};
+use crate::{
+    action::{Action, OllamaClient},
+    error::ServerError,
+};
 
 #[cfg(feature = "stream")]
 use {
@@ -202,21 +211,22 @@ impl IntoFuture for Action<ChatRequest, ChatResponse> {
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
-            let headers = match self.request.format {
-                Some(_) => {
-                    let mut headers = HeaderMap::new();
-                    headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
-                    Some(headers)
-                }
-                None => None,
+            let headers = if let Some(_) = self.request.format {
+                let mut headers = HeaderMap::new();
+                headers.insert(CONTENT_TYPE, HeaderValue::from_static("application/json"));
+                Some(headers)
+            } else {
+                None
             };
 
             let reqwest_resp = self.ollama.post(&self.request, headers).await?;
-            let content = reqwest_resp
-                .json()
-                .await
-                .map_err(|e| OllamaError::DecodingError(e))?;
-            Ok(content)
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
+            }
         })
     }
 }
