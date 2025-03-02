@@ -34,9 +34,6 @@ pub enum OllamaError {
     #[cfg(feature = "model")]
     #[error("file error: {0}")]
     FileError(std::io::Error),
-
-    #[error("unknown error: {0}")]
-    UnknownError(String),
 }
 
 #[derive(Debug, Deserialize)]
