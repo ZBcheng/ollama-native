@@ -13,11 +13,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let mut out = tokio::io::stdout();
         while let Some(Ok(item)) = stream.next().await {
             let content = item.message.unwrap().content;
-            out.write(content.as_bytes()).await.unwrap();
-            out.flush().await.unwrap();
+            out.write_all(content.as_bytes()).await.unwrap();
         }
 
-        out.write(b"\n").await.unwrap();
+        out.write_all(b"\n").await.unwrap();
         out.flush().await.unwrap();
     };
 

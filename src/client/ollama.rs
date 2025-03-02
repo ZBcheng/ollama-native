@@ -492,11 +492,12 @@ mod tests {
 
         let mut out = stdout();
         while let Some(item) = s.next().await {
-            out.write(item.unwrap().response.as_bytes()).await.unwrap();
-            out.flush().await.unwrap();
+            out.write_all(item.unwrap().response.as_bytes())
+                .await
+                .unwrap();
         }
 
-        out.write(b"\n").await.unwrap();
+        out.write_all(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 
@@ -532,13 +533,12 @@ mod tests {
 
         let mut out = stdout();
         while let Some(item) = s.next().await {
-            out.write(item.unwrap().message.unwrap().content.as_bytes())
+            out.write_all(item.unwrap().message.unwrap().content.as_bytes())
                 .await
                 .unwrap();
-            out.flush().await.unwrap();
         }
 
-        out.write(b"\n").await.unwrap();
+        out.write_all(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 
@@ -780,22 +780,20 @@ mod tests {
 
     async fn print_stream<T: Serialize>(mut resp: OllamaStream<T>) {
         let mut out = stdout();
-        out.flush().await.unwrap();
 
         while let Some(item) = resp.next().await {
             match item {
                 Ok(item) => {
                     let serialized = serde_json::to_string(&item).unwrap();
-                    out.write(format!("{}\n", serialized).as_bytes())
+                    out.write_all(format!("{}\n", serialized).as_bytes())
                         .await
                         .unwrap();
-                    out.flush().await.unwrap();
                 }
                 Err(e) => panic!("{}", e),
             }
         }
 
-        out.write(b"\n").await.unwrap();
+        out.write_all(b"\n").await.unwrap();
         out.flush().await.unwrap();
     }
 }
