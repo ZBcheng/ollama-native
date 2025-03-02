@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     println!("structured JSON output:\n{}\n", resposne.response);
 
-    // If the output format is invalid, an error will be returned.
+    // If the output format is an invalid JSON format, an error will be returned.
     let invalid_output_format = r"invalid format";
     match ollama
         .generate("llama3.1:8b", "Tell me a joke about sharks")
