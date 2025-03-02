@@ -160,6 +160,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     ///
     /// # Examples
     /// ```rust,no_run
@@ -188,6 +189,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
         Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(self.client.clone())
     }
@@ -196,6 +198,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn list_running_models(
         &self,
     ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
@@ -210,6 +213,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn show_model_information(
         &self,
         model: &str,
@@ -226,6 +230,7 @@ impl Ollama {
     /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     ///
     /// # Examples
     /// ```rust,no_run
@@ -257,6 +262,7 @@ impl Ollama {
     /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
         Action::<DeleteModelRequest, DeleteModelResponse>::new(self.client.clone(), model)
     }
@@ -286,6 +292,7 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
         Action::<PullModelRequest, PullModelResponse>::new(self.client.clone(), model)
     }
@@ -312,6 +319,7 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
         Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
     }
@@ -352,6 +360,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn generate_embeddings(
         &self,
         model: &str,
@@ -375,6 +384,7 @@ impl Ollama {
     /// - `OllamaError::BlobDoesNotExist`: The file blob does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn check_blob_exists(
         &self,
         digest: &str,
@@ -395,6 +405,7 @@ impl Ollama {
     /// - `OllamaError::UnexpectedDigest`: The digest used is not expected.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
+    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
     pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
         Action::<PushBlobRequest, PushBlobResponse>::new(self.client.clone(), file, digest)
     }
@@ -562,7 +573,7 @@ mod tests {
     #[ignore]
     async fn pull_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
-        let stream = ollama.pull_model("llama3.2").stream().await.unwrap();
+        let stream = ollama.pull_model("llama3.2xxx").stream().await.unwrap();
         print_stream(stream).await;
     }
 
@@ -570,13 +581,8 @@ mod tests {
     #[ignore]
     async fn push_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
-        let stream = ollama
-            .push_model("mattw/pygmalion:latest")
-            .stream()
-            .await
-            .unwrap();
-
-        print_stream(stream).await;
+        let resp = ollama.push_model("mattw/pygmalion:latest").await.unwrap();
+        print!("{resp:?}");
     }
 
     #[tokio::test]
