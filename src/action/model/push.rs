@@ -48,7 +48,7 @@ impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
             let reqwest_resp = self.ollama.post(&self.request, None).await?;
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
-                _ => {
+                _code => {
                     let error: ServerError = parse_response(reqwest_resp).await?;
                     Err(OllamaError::ServerError(error.error))
                 }

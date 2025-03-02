@@ -28,7 +28,7 @@ impl IntoFuture for Action<ListLocalModelsRequest, ListLocalModelsResponse> {
             let reqwest_resp = self.ollama.get(&self.request).await?;
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
-                _ => {
+                _code => {
                     let error: ServerError = parse_response(reqwest_resp).await?;
                     Err(OllamaError::ServerError(error.error))
                 }
