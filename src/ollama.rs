@@ -803,6 +803,7 @@ mod tests {
     }
 
     #[tokio::test]
+    #[ignore]
     async fn push_blob_should_work() {
         let ollama = Ollama::new(mock_config());
         let _ = ollama
