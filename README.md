@@ -10,7 +10,7 @@ For users who need features like chat with history, these functionalities can be
 ## Features
 - **Minimal Functionality**: Offers the core functionalities of Ollama without extra features or complexity.
 - **Rusty APIs**: Utilizes chainable methods, making the API simple, concise, and idiomatic to Rust.
-- 
+
 ## APIs
 - [x] Generate a completion
 - [x] Generate a chat completion
@@ -117,11 +117,11 @@ let resposne = ollama
 ## License
 This project is licensed under the [MIT license][license].
 
-[examples]: https://github.com/ZBcheng/examples
-[generate-completion]: https://github.com/ZBcheng/examples]/generate-completions.rs
-[chat-request-stream]: https://github.com/ZBcheng/examples]/chat-request-stream.rs
-[chat-with-images]: https://github.com/ZBcheng/examples]/chat-with-images.rs
-[generate-embeddings]: https://github.com/ZBcheng/examples]/generate-embeddings.rs
-[structured-outputs-example]: https://github.com/ZBcheng/examples]/structured_outputs.rs
+[examples]: https://github.com/ZBcheng/ollama-native/tree/main/examples
+[generate-completion]: https://github.com/ZBcheng/ollama-native/blob/main/examples/generate_completions.rs
+[chat-request-stream]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_request_stream.rs
+[chat-with-images]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_with_images.rs
+[generate-embeddings]: https://github.com/ZBcheng/ollama-native/blob/main/examples/generate_embeddings.rs
+[structured-outputs-example]: https://github.com/ZBcheng/ollama-native/blob/main/examples/structured_outputs.rs
 [ollama-api-doc]: https://github.com/ollama/ollama/blob/main/docs/api.md
 [license]: https://github.com/ZBcheng/ollama-native/blob/main/LICENSE
