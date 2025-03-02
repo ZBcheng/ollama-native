@@ -1,7 +1,13 @@
 [package]
 name = "ollama-native"
+description = "A minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama"
 version = "0.1.0"
 edition = "2024"
+readme = "README.md"
+repository = "https://github.com/ZBcheng/ollama-native"
+license-file = "LICENSE"
+keywords = ["ollama"]
+authors = ["ZBcheng bee0_0@icloud.com"]
 
 [dependencies]
 async-trait = { version = "0.1.86" }
