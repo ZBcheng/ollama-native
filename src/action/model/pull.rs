@@ -74,7 +74,7 @@ impl IntoStream<PullModelResponse> for Action<PullModelRequest, PullModelRespons
                         },
                         Err(e) => yield Err(e.into()),
                     }
-                    Err(e) => yield Err(OllamaError::DecodingError(e.into()))
+                    Err(e) => yield Err(OllamaError::DecodingError(e))
                 }
 
             };

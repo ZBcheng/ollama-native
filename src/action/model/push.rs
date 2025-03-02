@@ -73,7 +73,7 @@ impl IntoStream<PushModelResponse> for Action<PushModelRequest, PushModelRespons
                         },
                         Err(e) => yield Err(e.into()),
                     }
-                    Err(e) => yield Err(OllamaError::DecodingError(e.into()))
+                    Err(e) => yield Err(OllamaError::DecodingError(e))
                 }
 
             };
