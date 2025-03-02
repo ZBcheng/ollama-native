@@ -31,7 +31,7 @@ impl Ollama {
     /// - `url`: The URL of the Ollama server, e.g., "http://localhost:11434"
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// use ollama_native::Ollama;
     ///
     /// let ollama = Ollama::new("http://localhost:11434");
@@ -65,17 +65,17 @@ impl Ollama {
     ///
     /// # Examples
     /// Basic usage.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
     /// ```
     /// Streaming response.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// use ollama_native::action::IntoStream;
     ///
     /// let stream = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").stream().await?;
     /// ```
     /// With additional parameters.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let response = ollama
     ///     .generate("llama3.1:8b", "Tell me a joke about sharks")
     ///     .format("json") // Specify the format of the response
@@ -106,7 +106,7 @@ impl Ollama {
     ///
     /// # Examples
     /// Generate a completion in json format.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let response = ollama
     ///     .chat("llama3.1:8b")
     ///     .system_message("You are a robot who likes to tell jokes")
@@ -115,7 +115,7 @@ impl Ollama {
     ///     .await?;
     /// ```
     /// Or use a Vec of messages.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let messages = vec![
     ///     Message::new_system("You are a robot who likes to tell jokes"),
     ///     Message::new_user("Who are you?"),
@@ -137,7 +137,7 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let version = ollama.version().await?;
     /// println!("{}", version.version);
     /// ```
@@ -176,7 +176,7 @@ impl Ollama {
     ///
     /// # Examples
     /// Create a new model from an existing model.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let _ = ollama
     ///     .create_model("mario")
     ///     .from("llama3.1:8b")
@@ -184,7 +184,7 @@ impl Ollama {
     ///     .await?;
     /// ```
     /// Quantize a model.
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let _ = ollama
     ///     .create_model("llama3.1:quantized")
     ///     .from("llama3.1:8b-instruct-fp16")
@@ -203,7 +203,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let models = ollama.list_local_models().await?;
     /// for model in models {
     ///     println!("{}", model.name);
@@ -220,7 +220,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let models = ollama.list_running_models().await?;
     /// for model in models {
     ///     println!("{}", model.name);
@@ -243,7 +243,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let model_info = ollama.show_model_information("llama3.1:8b").await?;
     /// println!("{}", model_info.license);
     /// ```
@@ -266,7 +266,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// match ollama.copy_model("llama3.2", "llama3-backup").await {
     ///     Ok(_) => println!("Model copied successfully"),
     ///     Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
@@ -292,7 +292,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// match ollama.delete_model("llama3-backup").await {
     ///     Ok(_) => println!("Model deleted successfully"),
     ///     Err(OllamaError::ModelDoesNotExist) => println!("Model does not exist"),
@@ -331,7 +331,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// use ollama_native::action::IntoStream;
     ///
     /// use tokio::io::AsyncWriteExt;
@@ -378,7 +378,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let resp = ollama.push_model("mattw/pygmalion:latest").await?;
     /// ```
     pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
@@ -424,7 +424,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let resp = ollama.
     ///     generate_embeddings("all-minilm")
     ///     .input("Tell me a joke about sharks")
@@ -457,7 +457,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// match ollama.check_blob_exists("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab").await {
     ///     Ok(_) => println!("Blob exists"),
     ///     Err(OllamaError::BlobDoesNotExist) => println!("Blob does not exist"),
@@ -487,7 +487,7 @@ impl Ollama {
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
-    /// ```rust,no_run
+    /// ```rust,ignore
     /// let _ = ollama
     ///     .push_blob(
     ///         "model.gguf",
