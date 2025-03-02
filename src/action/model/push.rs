@@ -1,16 +1,17 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
+use reqwest::StatusCode;
 
 use crate::{
     abi::model::push::{PushModelRequest, PushModelResponse},
-    action::{Action, OllamaClient},
+    action::{Action, OllamaClient, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 #[cfg(feature = "stream")]
 use {
     crate::action::{IntoStream, OllamaStream},
-    crate::error::OllamaError,
     async_stream::stream,
     async_trait::async_trait,
     tokio_stream::StreamExt,
@@ -45,11 +46,13 @@ impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
             let reqwest_resp = self.ollama.post(&self.request, None).await?;
-            let response = reqwest_resp
-                .json()
-                .await
-                .map_err(|e| OllamaError::DecodingError(e))?;
-            Ok(response)
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _ => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
+            }
         })
     }
 }
