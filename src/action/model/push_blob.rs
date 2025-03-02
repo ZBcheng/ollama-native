@@ -2,11 +2,12 @@ use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
+use tokio_util::codec::{BytesCodec, FramedRead};
 
 use crate::{
     abi::model::push_blob::{PushBlobRequest, PushBlobResponse},
-    action::{Action, OllamaClient, OllamaRequest},
-    error::OllamaError,
+    action::{Action, OllamaClient, OllamaRequest, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 impl Action<PushBlobRequest, PushBlobResponse> {
@@ -36,9 +37,10 @@ impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
             match reqwest_resp.status() {
                 StatusCode::CREATED => Ok(PushBlobResponse::default()),
                 StatusCode::BAD_REQUEST => Err(OllamaError::UnexpectedDigest),
-                other => Err(OllamaError::UnknownError(format!(
-                    "/api/blobs/ got unknown status code: {other}",
-                ))),
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
             }
         })
     }
@@ -53,7 +55,6 @@ async fn upload_file(
         .await
         .map_err(|e| OllamaError::FileError(e))?;
 
-    use tokio_util::codec::{BytesCodec, FramedRead};
     let stream = FramedRead::new(file, BytesCodec::new());
     let body = reqwest::Body::wrap_stream(stream);
 
