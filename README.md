@@ -2,29 +2,89 @@
 ollama-native is a minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama.
 
 ## Goals 🎯
-- ✅ Provide access to the core [Ollama API][ollama-api-doc] functions for interacting with models.<br>
-- ❌ The project does not include any business-specific functionality like _**chat with history**_.<br>
+- ✅ Provide access to the core [Ollama API][ollama-api-doc] functions for interacting with models.
+- ❌ The project does not include any business-specific functionality like _**chat with history**_.
 
-For users who need features like chat with history, these functionalities can be implemented at the business layer of your application, where you can manage conversation state and context across requests. Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
+For users who need features like chat with history, these functionalities can be implemented at the business layer of your application. Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
 
 ## Features
 - **Minimal Functionality**: Offers the core functionalities of Ollama without extra features or complexity.
 - **Rusty APIs**: Utilizes chainable methods, making the API simple, concise, and idiomatic to Rust.
 
-## APIs
-- [x] Generate a completion
-- [x] Generate a chat completion
-- [x] Create a Model
-- [x] List Local Models
-- [x] Show Model Information
-- [x] Delete a Model
-- [x] Pull a Model
-- [x] Push a Model
-- [x] Generate Embeddings
-- [x] List Running Models
-- [x] Version
-- [x] Check if a Blob Exists
-- [x] Push a Blob
+### API Design
+<table>
+    <thead><tr>
+        <th ></th>
+        <th style="text-align: center;">❌</th>
+        <th style="text-align: center;">✅</th>
+    </tr></thead>
+<tbody>
+<tr>
+<th>Completion</th>
+</td><td>
+
+```rust
+let options = OptionsBuilder::new()
+    .stop("stop")
+    .num_predict(42)
+    .seed(42)
+    .build();
+
+let request = GenerateRequestBuilder::new()
+    .model("llama3.1:8b")
+    .prompt("Tell me a joke")
+    .options(options)
+    .build();
+
+let response = ollama.generate(request).await?;
+```
+
+</td><td>
+
+```rust
+let response = ollama
+    .generate("llama3.1:8b", "Tell me a joke")
+    .stop("stop")
+    .num_predict(42)
+    .seed(42)
+    .await?;
+```
+
+</td></tr>
+<tr>
+<th>Streaming Response</th>
+</td><td>
+
+```rust
+let options = OptionsBuilder::new()
+    .stop("stop")
+    .num_predict(42)
+    .seed(42)
+    .build();
+
+let request = GenerateStreamRequestBuilder::new()
+    .model("llama3.1:8b")
+    .prompt("Tell me a joke")
+    .options(options)
+    .build();
+
+let stream = ollama.generate_stream(request).await?;
+```
+
+</td><td>
+
+```rust
+let stream = ollama
+    .generate("llama3.1:8b", "Tell me a joke")
+    .stop("stop")
+    .num_predict(42)
+    .seed(42)
+    .stream() // Specify streaming response.
+    .await?;
+```
+
+</td></tr>
+</tbody></table>
 
 ## Usage Examples
 
@@ -39,13 +99,11 @@ let response = ollama
     .seed(5)
     .temperature(3.2)
     .await?;
-
-println!("{}", response.response);
 ```
 
 ### Generate request (Streaming)
 Enable `stream` feature:
-```
+```sh
 cargo add ollama-native --features stream
 ```
 ```rust
@@ -105,6 +163,21 @@ let resposne = ollama
     .format(&output_format)
     .await?;
 ```
+
+## APIs
+- [x] Generate a completion
+- [x] Generate a chat completion
+- [x] Create a Model
+- [x] List Local Models
+- [x] Show Model Information
+- [x] Delete a Model
+- [x] Pull a Model
+- [x] Push a Model
+- [x] Generate Embeddings
+- [x] List Running Models
+- [x] Version
+- [x] Check if a Blob Exists
+- [x] Push a Blob
 
 ## Examples
 - [x] [Generate Completions][generate-completion]
