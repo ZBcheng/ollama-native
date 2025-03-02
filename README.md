@@ -1,4 +1,8 @@
 # ollama-native 🐑
+![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ZBcheng/ollama-native/rust.yml)
+![GitHub Release](https://img.shields.io/github/v/release/ZBcheng/ollama-native)
+![GitHub License](https://img.shields.io/github/license/ZBCheng/ollama-native)
+
 ollama-native is a minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama.
 
 ## Goals 🎯
@@ -6,6 +10,22 @@ ollama-native is a minimalist Ollama Rust SDK that provides the most basic funct
 - ❌ The project does not include any business-specific functionality like _**chat with history**_.
 
 For users who need features like chat with history, these functionalities can be implemented at the business layer of your application ([chat-with-history-example][chat-with-history]). Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
+
+## APIs 📝
+- [x] Generate a completion
+- [x] Generate a chat completion
+- [x] Create a Model
+- [x] List Local Models
+- [x] Show Model Information
+- [x] Delete a Model
+- [x] Pull a Model
+- [x] Push a Model
+- [x] Generate Embeddings
+- [x] List Running Models
+- [x] Version
+- [x] Check if a Blob Exists
+- [x] Push a Blob
+
 
 ## Features 🧬
 - **Minimal Functionality**: Offers the core functionalities of Ollama without extra features or complexity.
@@ -86,7 +106,21 @@ let stream = ollama
 </td></tr>
 </tbody></table>
 
-## Usage Examples 🔦
+## Usage 🔦
+### Add dependencies
+default features (generate, chat, version)
+```sh
+cargo add ollama-native
+```
+
+`stream` features
+```sh
+cargo add ollama-native --features stream
+```
+`model` features (create models, pull models...)
+```sh
+cargo add ollama-native --features model
+```
 
 ### Generate a completion
 ```rust
@@ -102,10 +136,6 @@ let response = ollama
 ```
 
 ### Generate request (Streaming)
-Enable `stream` feature:
-```sh
-cargo add ollama-native --features stream
-```
 ```rust
 use ollama_native::{IntoStream, Ollama};
 use tokio::io::AsyncWriteExt;
@@ -120,25 +150,29 @@ let mut stream = ollama
 
 let mut out = tokio::io::stdout();
 while let Some(Ok(item)) = stream.next().await {
-    out.write_all(item.response.as_bytes()).await?;
+    out.write(item.response.as_bytes()).await?;
+    out.flush().await?;
 }
 
-out.write_all(b"\n").await?;
+out.write(b"\n").await?;
 out.flush().await?;
 ```
 
 ### Structured Ouput
-See [structured outputs example][structured-outputs-example] for more details.
+#### JSON Mode
 ```rust
 // JSON mode
 let resposne = ollama
     .generate(
         "llama3.1:8b",
-        "Ollama is 22 years old and is busy saving the world. Respond using JSON",
+        "Ollama is 22 years old and is busy saving the world.",
     )
     .format("json") // Use "json" to get the response in JSON format.
     .await?;
+```
 
+#### Specified JSON Format
+```rust
 // Specified JSON format.
 let output_format = r#"
 {
@@ -160,26 +194,13 @@ let output_format = r#"
 let resposne = ollama
     .generate(
         "llama3.1:8b",
-        "Ollama is 22 years old and is busy saving the world. Respond using JSON",
+        "Ollama is 22 years old and is busy saving the world.",
     )
     .format(&output_format)
     .await?;
 ```
 
-## APIs 📝
-- [x] Generate a completion
-- [x] Generate a chat completion
-- [x] Create a Model
-- [x] List Local Models
-- [x] Show Model Information
-- [x] Delete a Model
-- [x] Pull a Model
-- [x] Push a Model
-- [x] Generate Embeddings
-- [x] List Running Models
-- [x] Version
-- [x] Check if a Blob Exists
-- [x] Push a Blob
+See [structured outputs example][structured-outputs] for more details.
 
 ## Examples 📖
 - [x] [Generate Completions][generate-completion]
