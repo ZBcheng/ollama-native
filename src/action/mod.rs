@@ -7,7 +7,7 @@ pub mod model;
 use std::{marker::PhantomData, sync::Arc};
 
 use reqwest::header::HeaderMap;
-use serde::Serialize;
+use serde::{Serialize, de::DeserializeOwned};
 
 use crate::config::OllamaConfig;
 use crate::error::OllamaError;
@@ -84,4 +84,13 @@ pub trait IntoStream<Response> {
 
 pub trait OllamaRequest: Serialize + Send + Sync + 'static {
     fn path(&self) -> String;
+}
+
+pub(crate) async fn parse_response<T: DeserializeOwned>(
+    response: reqwest::Response,
+) -> Result<T, OllamaError> {
+    response
+        .json()
+        .await
+        .map_err(|e| OllamaError::DecodingError(e))
 }
