@@ -6,7 +6,7 @@ use reqwest::StatusCode;
 use crate::{
     abi::model::delete::{DeleteModelRequest, DeleteModelResponse},
     action::{Action, OllamaClient, OllamaRequest, parse_response},
-    error::{OllamaError, ServerError},
+    error::{OllamaError, OllamaServerError},
 };
 
 impl Action<DeleteModelRequest, DeleteModelResponse> {
@@ -45,8 +45,8 @@ impl IntoFuture for Action<DeleteModelRequest, DeleteModelResponse> {
                 StatusCode::OK => Ok(DeleteModelResponse::default()),
                 StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

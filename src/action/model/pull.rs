@@ -16,7 +16,7 @@ use {
 use crate::{
     abi::model::pull::{PullModelRequest, PullModelResponse},
     action::{Action, OllamaClient, parse_response},
-    error::ServerError,
+    error::OllamaServerError,
 };
 
 impl Action<PullModelRequest, PullModelResponse> {
@@ -51,8 +51,8 @@ impl IntoFuture for Action<PullModelRequest, PullModelResponse> {
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

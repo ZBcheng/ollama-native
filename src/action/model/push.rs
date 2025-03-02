@@ -6,7 +6,7 @@ use reqwest::StatusCode;
 use crate::{
     abi::model::push::{PushModelRequest, PushModelResponse},
     action::{Action, OllamaClient, parse_response},
-    error::{OllamaError, ServerError},
+    error::{OllamaError, OllamaServerError},
 };
 
 #[cfg(feature = "stream")]
@@ -49,8 +49,8 @@ impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

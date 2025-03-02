@@ -7,7 +7,7 @@ use tokio_util::codec::{BytesCodec, FramedRead};
 use crate::{
     abi::model::push_blob::{PushBlobRequest, PushBlobResponse},
     action::{Action, OllamaClient, OllamaRequest, parse_response},
-    error::{OllamaError, ServerError},
+    error::{OllamaError, OllamaServerError},
 };
 
 impl Action<PushBlobRequest, PushBlobResponse> {
@@ -38,8 +38,8 @@ impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
                 StatusCode::CREATED => Ok(PushBlobResponse::default()),
                 StatusCode::BAD_REQUEST => Err(OllamaError::UnexpectedDigest),
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

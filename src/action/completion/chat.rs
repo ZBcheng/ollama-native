@@ -16,7 +16,7 @@ use crate::{
 };
 use crate::{
     action::{Action, OllamaClient},
-    error::ServerError,
+    error::OllamaServerError,
 };
 
 #[cfg(feature = "stream")]
@@ -223,8 +223,8 @@ impl IntoFuture for Action<ChatRequest, ChatResponse> {
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

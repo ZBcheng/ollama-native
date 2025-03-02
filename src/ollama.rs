@@ -172,7 +172,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Examples
     /// Create a new model from an existing model.
@@ -200,7 +200,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -217,7 +217,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -240,7 +240,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -263,7 +263,7 @@ impl Ollama {
     /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -289,7 +289,7 @@ impl Ollama {
     /// - `OllamaError::ModelDoesNotExist`: The model does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -328,7 +328,7 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -375,7 +375,7 @@ impl Ollama {
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::StreamDecodingError`: There is an error decoding the stream.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -421,7 +421,7 @@ impl Ollama {
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -454,7 +454,7 @@ impl Ollama {
     /// - `OllamaError::BlobDoesNotExist`: The file blob does not exist.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run
@@ -484,7 +484,7 @@ impl Ollama {
     /// - `OllamaError::UnexpectedDigest`: The digest used is not expected.
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
-    /// - `OllamaError::ServerError`: There is an error with the Ollama server.
+    /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
     /// # Example
     /// ```rust,no_run

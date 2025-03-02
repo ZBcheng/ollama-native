@@ -4,7 +4,7 @@ use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::action::{Action, OllamaClient};
-use crate::error::ServerError;
+use crate::error::OllamaServerError;
 use crate::{
     abi::{
         Message,
@@ -252,8 +252,8 @@ impl IntoFuture for Action<CreateModelRequest, CreateModelResponse> {
             match reqwest_resp.status() {
                 StatusCode::OK => parse_response(reqwest_resp).await,
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })

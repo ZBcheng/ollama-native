@@ -6,7 +6,7 @@ use reqwest::StatusCode;
 use crate::{
     abi::model::check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
     action::{Action, OllamaClient, OllamaRequest, parse_response},
-    error::{OllamaError, ServerError},
+    error::{OllamaError, OllamaServerError},
 };
 
 impl Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
@@ -40,8 +40,8 @@ impl IntoFuture for Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
                 StatusCode::OK => Ok(CheckBlobExistsResponse::default()),
                 StatusCode::NOT_FOUND => Err(OllamaError::BlobDoesNotExist),
                 _code => {
-                    let error: ServerError = parse_response(reqwest_resp).await?;
-                    Err(OllamaError::ServerError(error.error))
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
                 }
             }
         })
