@@ -1,11 +1,12 @@
 use std::marker::PhantomData;
 
 use futures::future::BoxFuture;
+use reqwest::StatusCode;
 
 use crate::{
     abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
-    action::{Action, OllamaClient},
-    error::OllamaError,
+    action::{Action, OllamaClient, parse_response},
+    error::{OllamaError, ServerError},
 };
 
 impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
@@ -36,11 +37,13 @@ impl IntoFuture for Action<ShowModelInformationRequest, ShowModelInformationResp
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
             let reqwest_resp = self.ollama.post(&self.request, None).await?;
-            let response = reqwest_resp
-                .json()
-                .await
-                .map_err(|e| OllamaError::DecodingError(e))?;
-            Ok(response)
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: ServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::ServerError(error.error))
+                }
+            }
         })
     }
 }
