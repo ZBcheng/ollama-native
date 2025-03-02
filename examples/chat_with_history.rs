@@ -32,10 +32,11 @@ impl Manager {
         while let Some(Ok(item)) = stream.next().await {
             let content_chunk = item.message.unwrap().content;
             content.push_str(&content_chunk);
-            out.write_all(content_chunk.as_bytes()).await?;
+            out.write(content_chunk.as_bytes()).await?;
+            out.flush().await?;
         }
 
-        out.write_all(b"\n\n").await?;
+        out.write(b"\n\n").await?;
         out.flush().await?;
 
         self.update_history(input, &content).await;
