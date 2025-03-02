@@ -573,7 +573,7 @@ mod tests {
     #[ignore]
     async fn pull_a_model_should_work() {
         let ollama = Ollama::new(mock_config());
-        let stream = ollama.pull_model("llama3.2xxx").stream().await.unwrap();
+        let stream = ollama.pull_model("llama3.2").stream().await.unwrap();
         print_stream(stream).await;
     }
 
@@ -717,7 +717,7 @@ mod tests {
     #[tokio::test]
     async fn push_blob_should_work() {
         let ollama = Ollama::new(mock_config());
-        let _ = ollama.push_blob("xx", "digest:lxlkc").await;
+        let _ = ollama.push_blob("xx", "digest:lxlkc").await.unwrap();
     }
 
     fn mock_config() -> &'static str {
