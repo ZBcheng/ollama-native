@@ -40,18 +40,21 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// Name of the model to create.
+    #[inline]
     pub fn model(mut self, model: &'a str) -> Self {
         self.request.model = model;
         self
     }
 
     /// Name of an existing model to create the new model from.
+    #[inline]
     pub fn from(mut self, from: &'a str) -> Self {
         self.request.from = Some(from);
         self
     }
 
     /// A dictionary of file names to SHA256 digests of blobs to create the model from.
+    #[inline]
     pub fn files(mut self, files: HashMap<&'a str, &'a str>) -> Self {
         let mut cur_files = self.request.files.unwrap_or_default();
         files.iter().for_each(|(k, v)| {
@@ -62,6 +65,7 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// A dictionary of file names to SHA256 digests of blobs to create the model from.
+    #[inline]
     pub fn file(mut self, name: &'a str, sha: &'a str) -> Self {
         let mut cur_files = self.request.files.unwrap_or_default();
         cur_files.insert(name, sha);
@@ -70,6 +74,7 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// A dictionary of file names to SHA256 digests of blobs for LORA adapters.
+    #[inline]
     pub fn adapters(mut self, adapters: HashMap<&'a str, &'a str>) -> Self {
         let mut cur_adapters = self.request.adapters.unwrap_or_default();
         adapters.iter().for_each(|(k, v)| {
@@ -80,6 +85,7 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// A dictionary of file names to SHA256 digests of blobs for LORA adapters.
+    #[inline]
     pub fn adapter(mut self, name: &'a str, sha: &'a str) -> Self {
         let mut cur_adapters = self.request.adapters.unwrap_or_default();
         cur_adapters.insert(name, sha);
@@ -88,12 +94,14 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// The prompt template for the model.
+    #[inline]
     pub fn template(mut self, template: &'a str) -> Self {
         self.request.template = Some(template);
         self
     }
 
     /// A list of strings containing the license or licenses for the model.
+    #[inline]
     pub fn license(mut self, license: Vec<&'a str>) -> Self {
         license
             .into_iter()
@@ -102,12 +110,14 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// A string containing the system prompt for the model.
+    #[inline]
     pub fn system(mut self, system: &'a str) -> Self {
         self.request.system = Some(system);
         self
     }
 
     /// A list of message objects used to create a conversation.
+    #[inline]
     pub fn messages(mut self, messages: Vec<Message>) -> Self {
         messages
             .into_iter()
@@ -116,24 +126,28 @@ impl<'a> CreateModelAction<'a> {
     }
 
     /// A message objects used to create a conversation.
+    #[inline]
     pub fn message(mut self, message: Message) -> Self {
         self.request.messages.push(message);
         self
     }
 
     /// A system message objects used to create a conversation.
-    pub fn system_message(mut self, content: &str) -> Self {
+    #[inline]
+    pub fn system_message(mut self, content: &'a str) -> Self {
         self.request.messages.push(Message::new_system(content));
         self
     }
 
     /// A user message objects used to create a conversation.
-    pub fn user_message(mut self, content: &str) -> Self {
+    #[inline]
+    pub fn user_message(mut self, content: &'a str) -> Self {
         self.request.messages.push(Message::new_user(content));
         self
     }
 
     /// Quantize a non-quantized (e.g. float16) model.
+    #[inline]
     pub fn quantize(mut self, quantize: &'a str) -> Self {
         self.request.quantize = Some(quantize);
         self
@@ -141,6 +155,7 @@ impl<'a> CreateModelAction<'a> {
 
     /// Enable Mirostat sampling for controlling perplexity.
     /// (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0).
+    #[inline]
     pub fn mirostat(mut self, mirostat: u8) -> Self {
         self.request.parameters.mirostat(mirostat);
         self
@@ -150,6 +165,7 @@ impl<'a> CreateModelAction<'a> {
     /// A lower learning rate will result in slower adjustments, while a higher learning
     /// rate will make the algorithm more responsive.
     /// (Default: 0.1).
+    #[inline]
     pub fn mirostat_eta(mut self, mirostat_eta: f64) -> Self {
         self.request.parameters.mirostat_eta(mirostat_eta);
         self
@@ -158,6 +174,7 @@ impl<'a> CreateModelAction<'a> {
     /// Controls the balance between coherence and diversity of the output. A lower value
     /// will result in more focused and coherent text.
     /// (Default: 5.0).
+    #[inline]
     pub fn mirostat_tau(mut self, mirostat_tau: f64) -> Self {
         self.request.parameters.mirostat_tau(mirostat_tau);
         self
@@ -165,6 +182,7 @@ impl<'a> CreateModelAction<'a> {
 
     /// Sets the size of the context window used to generate the next token.
     /// (Default: 2048).
+    #[inline]
     pub fn num_ctx(mut self, num_ctx: i64) -> Self {
         self.request.parameters.num_ctx(num_ctx);
         self
@@ -172,6 +190,7 @@ impl<'a> CreateModelAction<'a> {
 
     /// Sets how far back for the model to look back to prevent repetition.
     /// (Default: 64, 0 = disabled, -1 = num_ctx).
+    #[inline]
     pub fn repeat_last_n(mut self, repeat_last_n: i64) -> Self {
         self.request.parameters.repeat_last_n(repeat_last_n);
         self
@@ -180,6 +199,7 @@ impl<'a> CreateModelAction<'a> {
     /// Sets how strongly to penalize repetitions. A higher value (e.g., 1.5) will penalize
     /// repetitions more strongly, while a lower value (e.g., 0.9) will be more lenient.
     /// (Default: 1.1).
+    #[inline]
     pub fn repeat_penalty(mut self, repeat_penalty: f64) -> Self {
         self.request.parameters.repeat_penalty(repeat_penalty);
         self
@@ -187,6 +207,7 @@ impl<'a> CreateModelAction<'a> {
 
     /// The temperature of the model. Increasing the temperature will make the model answer more creatively.
     /// (Default: 0.8).
+    #[inline]
     pub fn temperature(mut self, temperature: f64) -> Self {
         self.request.parameters.temperature(temperature);
         self
@@ -195,6 +216,7 @@ impl<'a> CreateModelAction<'a> {
     /// Sets the random number seed to use for generation. Setting this to a specific number
     /// will make the model generate the same text for the same prompt.
     /// (Default: 0).
+    #[inline]
     pub fn seed(mut self, seed: i64) -> Self {
         self.request.parameters.seed(seed);
         self
@@ -203,6 +225,7 @@ impl<'a> CreateModelAction<'a> {
     /// Sets the stop sequences to use. When this pattern is encountered the LLM will stop
     /// generating text and return. Multiple stop patterns may be set by specifying multiple
     /// separate `stop` parameters in a modelfile.
+    #[inline]
     pub fn stop(mut self, stop: &str) -> Self {
         self.request.parameters.stop(stop);
         self
@@ -210,6 +233,7 @@ impl<'a> CreateModelAction<'a> {
 
     /// Maximum number of tokens to predict when generating text.
     /// (Default: -1, infinite generation)
+    #[inline]
     pub fn num_predict(mut self, num_predict: i64) -> Self {
         self.request.parameters.num_predict(num_predict);
         self
@@ -218,6 +242,7 @@ impl<'a> CreateModelAction<'a> {
     /// Reduces the probability of generating nonsense. A higher value (e.g. 100) will give
     /// more diverse answers, while a lower value (e.g. 10) will be more conservative.
     /// (Default: 40)
+    #[inline]
     pub fn top_k(mut self, top_k: i64) -> Self {
         self.request.parameters.top_k(top_k);
         self
@@ -226,6 +251,7 @@ impl<'a> CreateModelAction<'a> {
     /// Works together with top-k. A higher value (e.g., 0.95) will lead to more diverse text,
     /// while a lower value (e.g., 0.5) will generate more focused and conservative text.
     /// (Default: 0.9)
+    #[inline]
     pub fn top_p(mut self, top_p: f64) -> Self {
         self.request.parameters.top_p(top_p);
         self
@@ -236,6 +262,7 @@ impl<'a> CreateModelAction<'a> {
     /// of the most likely token. For example, with p=0.05 and the most likely token having a probability
     /// of 0.9, logits with a value less than 0.045 are filtered out.
     /// (Default: 0.0)
+    #[inline]
     pub fn min_p(mut self, min_p: f64) -> Self {
         self.request.parameters.min_p(min_p);
         self

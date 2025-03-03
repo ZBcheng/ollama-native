@@ -32,6 +32,7 @@ impl<'a> PushModelAction<'a> {
 
     /// Allow insecure connections to the library.
     /// Only use this if you are pushing to your library during development.
+    #[inline]
     pub fn insecure(mut self) -> Self {
         self.request.insecure = Some(true);
         self

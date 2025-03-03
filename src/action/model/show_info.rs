@@ -23,6 +23,7 @@ impl<'a> ShowModelInformationAction<'a> {
     }
 
     /// If set to true, returns full data for verbose response fields.
+    #[inline]
     pub fn verbose(mut self) -> Self {
         self.request.verbose = Some(true);
         self
