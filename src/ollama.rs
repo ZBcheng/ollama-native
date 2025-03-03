@@ -628,10 +628,18 @@ mod tests {
 
     #[tokio::test]
     #[ignore]
-    async fn pull_a_model_should_work() {
+    async fn pull_a_model_stream_should_work() {
         let ollama = Ollama::new(mock_config());
         let stream = ollama.pull_model("llama3.2").stream().await.unwrap();
         print_stream(stream).await;
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn pull_a_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let response = ollama.pull_model("llama3.1:8b").await.unwrap();
+        println!("{response:?}");
     }
 
     #[tokio::test]

@@ -5,6 +5,7 @@ use crate::error::OllamaError;
 
 #[cfg(feature = "stream")]
 use {
+    crate::abi::model::pull::PullModelStreamingResponse,
     crate::action::{IntoStream, OllamaStream},
     async_stream::stream,
     async_trait::async_trait,
@@ -61,8 +62,8 @@ impl<'a> IntoFuture for PullModelAction<'a> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl<'a> IntoStream<PullModelResponse> for PullModelAction<'a> {
-    async fn stream(mut self) -> Result<OllamaStream<PullModelResponse>, OllamaError> {
+impl<'a> IntoStream<PullModelStreamingResponse> for PullModelAction<'a> {
+    async fn stream(mut self) -> Result<OllamaStream<PullModelStreamingResponse>, OllamaError> {
         self.request.stream = true;
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 
@@ -86,7 +87,7 @@ impl<'a> IntoStream<PullModelResponse> for PullModelAction<'a> {
 }
 
 #[cfg(feature = "stream")]
-fn parse_chunks(chunks: &[u8]) -> Result<Vec<PullModelResponse>, OllamaError> {
+fn parse_chunks(chunks: &[u8]) -> Result<Vec<PullModelStreamingResponse>, OllamaError> {
     let chunks = std::str::from_utf8(&chunks).map_err(|e| {
         OllamaError::StreamDecodingError(format!("failed to parse chunk to utf8: {e}"))
     })?;
@@ -96,9 +97,9 @@ fn parse_chunks(chunks: &[u8]) -> Result<Vec<PullModelResponse>, OllamaError> {
     let mut resp = vec![];
 
     for sp in splitted {
-        let deserialized: PullModelResponse = serde_json::from_str(sp).map_err(|e| {
+        let deserialized: PullModelStreamingResponse = serde_json::from_str(sp).map_err(|e| {
             OllamaError::StreamDecodingError(format!(
-                "failed to deserialize PullModelResponse from {sp}: {e}",
+                "failed to deserialize PullModelStreamingResponse from {sp}: {e}",
             ))
         })?;
         resp.push(deserialized);
