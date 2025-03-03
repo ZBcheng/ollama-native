@@ -11,7 +11,8 @@ use crate::{
 
 pub struct VersionAction<'a> {
     ollama: OllamaClient,
-    request: VersionRequest<'a>,
+    request: VersionRequest,
+    _marker: &'a PhantomData<()>,
 }
 
 impl<'a> VersionAction<'a> {
