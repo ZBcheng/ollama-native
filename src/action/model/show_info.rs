@@ -1,26 +1,25 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::{
     abi::model::show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct ShowModelInformationAction<'a> {
+    ollama: OllamaClient,
+    request: ShowModelInformationRequest<'a>,
+}
+
+impl<'a> ShowModelInformationAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = ShowModelInformationRequest {
-            model: model.to_string(),
+            model,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 
     /// If set to true, returns full data for verbose response fields.
@@ -30,9 +29,9 @@ impl Action<ShowModelInformationRequest, ShowModelInformationResponse> {
     }
 }
 
-impl IntoFuture for Action<ShowModelInformationRequest, ShowModelInformationResponse> {
+impl<'a> IntoFuture for ShowModelInformationAction<'a> {
     type Output = Result<ShowModelInformationResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {

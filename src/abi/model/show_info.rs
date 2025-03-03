@@ -8,9 +8,9 @@ use super::ModelInfoDetail;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Default)]
-pub struct ShowModelInformationRequest {
+pub struct ShowModelInformationRequest<'a> {
     /// Name of the model to show.
-    pub model: String,
+    pub model: &'a str,
 
     /// If set to `true`, returns full data for verbose response fields.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -28,7 +28,7 @@ pub struct ShowModelInformationResponse {
     pub model_info: HashMap<String, serde_json::Value>,
 }
 
-impl OllamaRequest for ShowModelInformationRequest {
+impl<'a> OllamaRequest for ShowModelInformationRequest<'a> {
     fn path(&self) -> String {
         "/api/show".to_string()
     }
