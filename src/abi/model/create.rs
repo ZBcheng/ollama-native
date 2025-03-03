@@ -7,33 +7,33 @@ use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize, Default)]
-pub struct CreateModelRequest {
+pub struct CreateModelRequest<'a> {
     /// Name of the model to create.
-    pub model: String,
+    pub model: &'a str,
 
     /// Name of an existing model to create the new model from.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub from: Option<String>,
+    pub from: Option<&'a str>,
 
     /// A dictionary of file names to SHA256 digests of blobs to create the model from.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub files: Option<HashMap<String, String>>,
+    pub files: Option<HashMap<&'a str, &'a str>>,
 
     /// A dictionary of file names to SHA256 digests of blobs for LORA adapters.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub adapters: Option<HashMap<String, String>>,
+    pub adapters: Option<HashMap<&'a str, &'a str>>,
 
     /// The prompt template for the model.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template: Option<String>,
+    pub template: Option<&'a str>,
 
     /// A list of strings containing the license or licenses for the model.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub license: Vec<String>,
+    pub license: Vec<&'a str>,
 
     /// A string containing the system prompt for the model.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub system: Option<String>,
+    pub system: Option<&'a str>,
 
     /// A dictionary of parameters for the model (see
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
@@ -51,7 +51,7 @@ pub struct CreateModelRequest {
 
     /// Quantize a non-quantized (e.g. float16) model.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub quantize: Option<String>,
+    pub quantize: Option<&'a str>,
 }
 
 #[cfg(feature = "model")]
@@ -60,7 +60,7 @@ pub struct CreateModelResponse {
     pub status: String,
 }
 
-impl OllamaRequest for CreateModelRequest {
+impl<'a> OllamaRequest for CreateModelRequest<'a> {
     fn path(&self) -> String {
         "/api/create".to_string()
     }

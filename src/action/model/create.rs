@@ -1,9 +1,9 @@
-use std::{collections::HashMap, marker::PhantomData};
+use std::collections::HashMap;
 
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
-use crate::action::{Action, OllamaClient};
+use crate::action::OllamaClient;
 use crate::error::OllamaServerError;
 use crate::{
     abi::{
@@ -24,85 +24,86 @@ use {
 #[cfg(feature = "model")]
 use crate::error::OllamaError;
 
-impl Action<CreateModelRequest, CreateModelResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct CreateModelAction<'a> {
+    ollama: OllamaClient,
+    request: CreateModelRequest<'a>,
+}
+
+impl<'a> CreateModelAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = CreateModelRequest {
-            model: model.to_string(),
+            model,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 
     /// Name of the model to create.
-    pub fn model(mut self, model: &str) -> Self {
-        self.request.model = model.to_string();
+    pub fn model(mut self, model: &'a str) -> Self {
+        self.request.model = model;
         self
     }
 
     /// Name of an existing model to create the new model from.
-    pub fn from(mut self, from: &str) -> Self {
-        self.request.from = Some(from.to_string());
+    pub fn from(mut self, from: &'a str) -> Self {
+        self.request.from = Some(from);
         self
     }
 
     /// A dictionary of file names to SHA256 digests of blobs to create the model from.
-    pub fn files(mut self, files: HashMap<String, String>) -> Self {
+    pub fn files(mut self, files: HashMap<&'a str, &'a str>) -> Self {
         let mut cur_files = self.request.files.unwrap_or_default();
         files.iter().for_each(|(k, v)| {
-            cur_files.insert(k.to_string(), v.to_string());
+            cur_files.insert(k, v);
         });
         self.request.files = Some(cur_files);
         self
     }
 
     /// A dictionary of file names to SHA256 digests of blobs to create the model from.
-    pub fn file(mut self, name: &str, sha: &str) -> Self {
+    pub fn file(mut self, name: &'a str, sha: &'a str) -> Self {
         let mut cur_files = self.request.files.unwrap_or_default();
-        cur_files.insert(name.to_string(), sha.to_string());
+        cur_files.insert(name, sha);
         self.request.files = Some(cur_files);
         self
     }
 
     /// A dictionary of file names to SHA256 digests of blobs for LORA adapters.
-    pub fn adapters(mut self, adapters: HashMap<String, String>) -> Self {
+    pub fn adapters(mut self, adapters: HashMap<&'a str, &'a str>) -> Self {
         let mut cur_adapters = self.request.adapters.unwrap_or_default();
         adapters.iter().for_each(|(k, v)| {
-            cur_adapters.insert(k.to_string(), v.to_string());
+            cur_adapters.insert(k, v);
         });
         self.request.adapters = Some(cur_adapters);
         self
     }
 
     /// A dictionary of file names to SHA256 digests of blobs for LORA adapters.
-    pub fn adapter(mut self, name: &str, sha: &str) -> Self {
+    pub fn adapter(mut self, name: &'a str, sha: &'a str) -> Self {
         let mut cur_adapters = self.request.adapters.unwrap_or_default();
-        cur_adapters.insert(name.to_string(), sha.to_string());
+        cur_adapters.insert(name, sha);
         self.request.adapters = Some(cur_adapters);
         self
     }
 
     /// The prompt template for the model.
-    pub fn template(mut self, template: &str) -> Self {
-        self.request.template = Some(template.to_string());
+    pub fn template(mut self, template: &'a str) -> Self {
+        self.request.template = Some(template);
         self
     }
 
     /// A list of strings containing the license or licenses for the model.
-    pub fn license(mut self, license: Vec<impl ToString>) -> Self {
+    pub fn license(mut self, license: Vec<&'a str>) -> Self {
         license
             .into_iter()
-            .for_each(|l| self.request.license.push(l.to_string()));
+            .for_each(|l| self.request.license.push(l));
         self
     }
 
     /// A string containing the system prompt for the model.
-    pub fn system(mut self, system: &str) -> Self {
-        self.request.system = Some(system.to_string());
+    pub fn system(mut self, system: &'a str) -> Self {
+        self.request.system = Some(system);
         self
     }
 
@@ -115,8 +116,8 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     }
 
     /// A message objects used to create a conversation.
-    pub fn message(mut self, message: &Message) -> Self {
-        self.request.messages.push(message.clone());
+    pub fn message(mut self, message: Message) -> Self {
+        self.request.messages.push(message);
         self
     }
 
@@ -133,8 +134,8 @@ impl Action<CreateModelRequest, CreateModelResponse> {
     }
 
     /// Quantize a non-quantized (e.g. float16) model.
-    pub fn quantize(mut self, quantize: &str) -> Self {
-        self.request.quantize = Some(quantize.to_string());
+    pub fn quantize(mut self, quantize: &'a str) -> Self {
+        self.request.quantize = Some(quantize);
         self
     }
 
@@ -242,9 +243,9 @@ impl Action<CreateModelRequest, CreateModelResponse> {
 }
 
 #[cfg(feature = "model")]
-impl IntoFuture for Action<CreateModelRequest, CreateModelResponse> {
+impl<'a> IntoFuture for CreateModelAction<'a> {
     type Output = Result<CreateModelResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -262,7 +263,7 @@ impl IntoFuture for Action<CreateModelRequest, CreateModelResponse> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl IntoStream<CreateModelResponse> for Action<CreateModelRequest, CreateModelResponse> {
+impl<'a> IntoStream<CreateModelResponse> for CreateModelAction<'a> {
     async fn stream(mut self) -> Result<OllamaStream<CreateModelResponse>, OllamaError> {
         self.request.stream = true;
 
