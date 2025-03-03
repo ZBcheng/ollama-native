@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::{
     StatusCode,
@@ -14,10 +12,7 @@ use crate::{
     },
     action::parse_response,
 };
-use crate::{
-    action::{Action, OllamaClient},
-    error::OllamaServerError,
-};
+use crate::{action::OllamaClient, error::OllamaServerError};
 
 #[cfg(feature = "stream")]
 use {
@@ -27,23 +22,23 @@ use {
     tokio_stream::StreamExt,
 };
 
-impl Action<ChatRequest, ChatResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct ChatAction<'a> {
+    request: ChatRequest<'a>,
+    ollama: OllamaClient,
+}
+
+impl<'a> ChatAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = ChatRequest {
-            model: model.to_string(),
+            model,
             messages: vec![],
             ..Default::default()
         };
-
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 }
 
-impl Action<ChatRequest, ChatResponse> {
+impl<'a> ChatAction<'a> {
     pub fn messages(mut self, messages: Vec<Message>) -> Self {
         messages
             .into_iter()
@@ -205,9 +200,9 @@ impl Action<ChatRequest, ChatResponse> {
     }
 }
 
-impl IntoFuture for Action<ChatRequest, ChatResponse> {
+impl<'a> IntoFuture for ChatAction<'a> {
     type Output = Result<ChatResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -233,7 +228,7 @@ impl IntoFuture for Action<ChatRequest, ChatResponse> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl IntoStream<ChatResponse> for Action<ChatRequest, ChatResponse> {
+impl<'a> IntoStream<ChatResponse> for ChatAction<'a> {
     async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
         self.request.stream = true;
 

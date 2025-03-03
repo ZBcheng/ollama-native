@@ -1,3 +1,4 @@
+use crate::action::completion::chat::ChatAction;
 use crate::action::completion::generate::GenerateAction;
 use crate::action::{Action, OllamaClient};
 use crate::config::OllamaConfig;
@@ -123,8 +124,8 @@ impl Ollama {
     ///     .messages(messages)
     ///     .await?;
     /// ```
-    pub fn chat(&self, model: &str) -> Action<ChatRequest, ChatResponse> {
-        Action::<ChatRequest, ChatResponse>::new(self.client.clone(), model)
+    pub fn chat<'a>(&self, model: &'a str) -> ChatAction<'a> {
+        ChatAction::new(self.client.clone(), model)
     }
 
     /// Retrieve the Ollama version.

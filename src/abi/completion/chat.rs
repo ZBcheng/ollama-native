@@ -6,9 +6,9 @@ use crate::{
 };
 
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct ChatRequest {
+pub struct ChatRequest<'a> {
     /// The model name.
-    pub model: String,
+    pub model: &'a str,
 
     /// The messages of the chat, this can be used to keep a chat memory.
     pub messages: Vec<Message>,
@@ -124,7 +124,7 @@ impl Serialize for Format {
     }
 }
 
-impl OllamaRequest for ChatRequest {
+impl<'a> OllamaRequest for ChatRequest<'a> {
     fn path(&self) -> String {
         "/api/chat".to_string()
     }
