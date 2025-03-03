@@ -4,7 +4,7 @@ pub mod version;
 #[cfg(feature = "model")]
 pub mod model;
 
-use std::{marker::PhantomData, sync::Arc};
+use std::sync::Arc;
 
 use reqwest::header::HeaderMap;
 use serde::{Serialize, de::DeserializeOwned};
@@ -65,12 +65,6 @@ impl OllamaClient {
             .map_err(|e| OllamaError::RequestError(e))?;
         Ok(response)
     }
-}
-
-pub struct Action<Request: OllamaRequest, Response> {
-    pub ollama: OllamaClient,
-    pub request: Request,
-    pub _resp: PhantomData<Response>,
 }
 
 #[cfg(feature = "stream")]
