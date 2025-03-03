@@ -1,8 +1,8 @@
 # ollama-native 🐑
-[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ZBcheng/ollama-native/rust.yml)](https://github.com/ZBcheng/ollama-native/blob/main/.github/workflows/rust.yml)
-[![GitHub Release](https://img.shields.io/github/v/release/ZBcheng/ollama-native)](https://github.com/ZBcheng/ollama-native/releases)
-[![Crates.io Version](https://img.shields.io/crates/v/ollama-native?color=%23D400FF)](https://crates.io/crates/ollama-native)
-[![GitHub License](https://img.shields.io/github/license/ZBCheng/ollama-native)](https://github.com/ZBcheng/ollama-native/blob/main/LICENSE)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ZBcheng/ollama-native/rust.yml)][workflow]
+[![GitHub Release](https://img.shields.io/github/v/release/ZBcheng/ollama-native)][release]
+[![Crates.io Version](https://img.shields.io/crates/v/ollama-native?color=%23D400FF)][crates-io]
+[![GitHub License](https://img.shields.io/github/license/ZBCheng/ollama-native)][license]
 
 ollama-native is a minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama.
 
@@ -10,7 +10,8 @@ ollama-native is a minimalist Ollama Rust SDK that provides the most basic funct
 - ✅ Provide access to the core [Ollama API][ollama-api-doc] functions for interacting with models.
 - ❌ The project does not include any business-specific functionality like _**chat with history**_.
 
-For users who need features like chat with history, these functionalities can be implemented at the business layer of your application ([chat-with-history-example][chat-with-history]). Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
+> [!TIP]
+> For users who need features like chat with history, these functionalities can be implemented at the business layer of your application ([chat-with-history-example][chat-with-history]). Alternatively, you may choose to use other Ollama SDKs that provide these higher-level features.
 
 ## APIs 📝
 - [x] Generate a completion
@@ -154,12 +155,11 @@ while let Some(Ok(item)) = stream.next().await {
     out.write(item.response.as_bytes()).await?;
     out.flush().await?;
 }
-
-out.write(b"\n").await?;
-out.flush().await?;
 ```
 
 ### Structured Ouput
+> [!TIP]
+> See [structured outputs example][structured-outputs] for more details.
 #### JSON Mode
 ```rust
 // JSON mode
@@ -201,8 +201,6 @@ let resposne = ollama
     .await?;
 ```
 
-See [structured outputs example][structured-outputs] for more details.
-
 ## Examples 📖
 - [x] [Generate Completions][generate-completion]
 - [x] [Generate Chat Completions (Streaming)][chat-request-stream]
@@ -222,4 +220,7 @@ This project is licensed under the [MIT license][license].
 [structured-outputs]: https://github.com/ZBcheng/ollama-native/blob/main/examples/structured_outputs.rs
 [chat-with-history]: https://github.com/ZBcheng/ollama-native/blob/main/examples/chat_with_history.rs
 [ollama-api-doc]: https://github.com/ollama/ollama/blob/main/docs/api.md
+[workflow]: https://github.com/ZBcheng/ollama-native/blob/main/.github/workflows/rust.yml
+[release]: https://github.com/ZBcheng/ollama-native/releases
+[crates-io]: https://crates.io/crates/ollama-native
 [license]: https://github.com/ZBcheng/ollama-native/blob/main/LICENSE
