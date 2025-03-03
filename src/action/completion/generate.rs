@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::{
     StatusCode,
@@ -19,43 +17,44 @@ use crate::{
         chat::Format,
         generate::{GenerateRequest, GenerateResponse},
     },
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<GenerateRequest, GenerateResponse> {
-    pub fn new(ollama: OllamaClient, model: &str, prompt: &str) -> Self {
+pub struct GenerateAction<'a> {
+    ollama: OllamaClient,
+    request: GenerateRequest<'a>,
+}
+
+impl<'a> GenerateAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str, prompt: &'a str) -> Self {
         let request = GenerateRequest {
-            model: model.to_string(),
-            prompt: prompt.to_string(),
+            model: model,
+            prompt: prompt,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 }
 
-impl Action<GenerateRequest, GenerateResponse> {
+impl<'a> GenerateAction<'a> {
     /// The text after the model response.
-    pub fn suffix(mut self, suffix: &str) -> Self {
-        self.request.suffix = Some(suffix.to_string());
+    pub fn suffix(mut self, suffix: &'a str) -> Self {
+        self.request.suffix = Some(suffix);
         self
     }
 
     /// A list of base64-encoded images (for multimodal models such as `llava`).
-    pub fn images(mut self, images: Vec<impl ToString>) -> Self {
+    pub fn images(mut self, images: Vec<&'a str>) -> Self {
         images
             .into_iter()
-            .for_each(|img| self.request.images.push(img.to_string()));
+            .for_each(|img| self.request.images.push(img));
         self
     }
 
-    pub fn image(mut self, image: &str) -> Self {
-        self.request.images.push(image.to_string());
+    pub fn image(mut self, image: &'a str) -> Self {
+        self.request.images.push(image);
         self
     }
 
@@ -70,14 +69,14 @@ impl Action<GenerateRequest, GenerateResponse> {
     }
 
     /// System message to (overrides what is defined in the `Modelfile`).
-    pub fn system(mut self, system: &str) -> Self {
-        self.request.system = Some(system.to_string());
+    pub fn system(mut self, system: &'a str) -> Self {
+        self.request.system = Some(system);
         self
     }
 
     /// The prompt template to use (overrides what is defined in the `Modelfile`).
-    pub fn template(mut self, template: &str) -> Self {
-        self.request.template = Some(template.to_string());
+    pub fn template(mut self, template: &'a str) -> Self {
+        self.request.template = Some(template);
         self
     }
 
@@ -197,9 +196,9 @@ impl Action<GenerateRequest, GenerateResponse> {
     }
 }
 
-impl IntoFuture for Action<GenerateRequest, GenerateResponse> {
+impl<'a> IntoFuture for GenerateAction<'a> {
     type Output = Result<GenerateResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -225,7 +224,7 @@ impl IntoFuture for Action<GenerateRequest, GenerateResponse> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl IntoStream<GenerateResponse> for Action<GenerateRequest, GenerateResponse> {
+impl<'a> IntoStream<GenerateResponse> for GenerateAction<'a> {
     async fn stream(mut self) -> Result<OllamaStream<GenerateResponse>, OllamaError> {
         self.request.stream = true;
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();

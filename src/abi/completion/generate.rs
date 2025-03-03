@@ -7,20 +7,20 @@ use crate::{abi::Parameter, action::OllamaRequest};
 use super::chat::Format;
 
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct GenerateRequest {
+pub struct GenerateRequest<'a> {
     /// The model name.
-    pub model: String,
+    pub model: &'a str,
 
     /// The prompt to generate a response for.
-    pub prompt: String,
+    pub prompt: &'a str,
 
     /// The text after the model response.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub suffix: Option<String>,
+    pub suffix: Option<&'a str>,
 
     /// A list of base64-encoded images (for multimodal models such as `llava`).
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub images: Vec<String>,
+    pub images: Vec<&'a str>,
 
     /// The foramt to return a response in. Format can be `json` or a JSON schema.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -34,11 +34,11 @@ pub struct GenerateRequest {
 
     /// System message to (overrides what is defined in the `Modelfile`).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub system: Option<String>,
+    pub system: Option<&'a str>,
 
     /// The prompt template to use (overrides what is defined in the `Modelfile`).
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub template: Option<String>,
+    pub template: Option<&'a str>,
 
     /// If `false` the response will be returned as a single response object, rather than a stream of objects
     pub stream: bool,
@@ -91,7 +91,7 @@ pub struct GenerateResponse {
     pub eval_duration: Option<i64>,
 }
 
-impl OllamaRequest for GenerateRequest {
+impl<'a> OllamaRequest for GenerateRequest<'a> {
     fn path(&self) -> String {
         "/api/generate".to_string()
     }
