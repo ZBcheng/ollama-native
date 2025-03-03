@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
@@ -17,6 +19,7 @@ impl<'a> VersionAction<'a> {
         Self {
             ollama,
             request: VersionRequest::default(),
+            _marker: &PhantomData::<()>,
         }
     }
 }
