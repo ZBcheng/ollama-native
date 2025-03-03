@@ -47,7 +47,8 @@ impl Ollama {
     /// - `system`: (optional) System message to (overrides what is defined in the `Modelfile`).
     /// - `template`: (optional) The prompt template to use (overrides what is defined in the `Modelfile`).
     /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
-    /// - `raw`: (optional) If `true` no formatting will be applied to the prompt. You may choose to use the `raw` parameter if you are specifying a full templated prompt in your request to the API.
+    /// - `raw`: (optional) If specified no formatting will be applied to the prompt.
+    /// You may choose to use the `raw` parameter if you are specifying a full templated prompt in your request to the API.
     /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
     ///
     /// # Errors
@@ -225,7 +226,7 @@ impl Ollama {
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
     /// # Parameters
     /// - `model`: Name of the model to show.
-    /// - `verbose`: (optional) If set to `true`, returns full data for verbose response fields
+    /// - `verbose`: (optional) If specified, returns full data for verbose response fields
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -313,7 +314,6 @@ impl Ollama {
     /// # Example
     /// ```rust,ignore
     /// use ollama_native::action::IntoStream;
-    ///
     /// use tokio::io::AsyncWriteExt;
     /// use tokio_stream::StreamExt;
     ///
@@ -325,9 +325,6 @@ impl Ollama {
     ///     out.write(format!("{}\n", serialized).as_bytes()).await?
     ///     out.flush().await?;
     /// }
-    ///
-    /// out.write(b"\n").await?;
-    /// out.flush().await?;
     /// ```
     pub fn pull_model<'a>(&self, model: &'a str) -> PullModelAction<'a> {
         PullModelAction::new(self.client.clone(), model)
@@ -444,9 +441,6 @@ impl Ollama {
     /// # Parameters
     /// - `file`: The file you want to push.
     /// - `digest`: The expected SHA256 digest of the file.
-    ///
-    /// # Returns
-    /// - `PushBlobRequest {}`
     ///
     /// # Errors
     /// - `OllamaError::UnexpectedDigest`: The digest used is not expected.

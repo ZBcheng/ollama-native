@@ -29,8 +29,8 @@ pub struct GenerateAction<'a> {
 impl<'a> GenerateAction<'a> {
     pub fn new(ollama: OllamaClient, model: &'a str, prompt: &'a str) -> Self {
         let request = GenerateRequest {
-            model: model,
-            prompt: prompt,
+            model,
+            prompt,
             ..Default::default()
         };
 
