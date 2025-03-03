@@ -1,22 +1,15 @@
+use crate::action::OllamaClient;
 use crate::action::completion::chat::ChatAction;
 use crate::action::completion::generate::GenerateAction;
 use crate::action::version::version::VersionAction;
-use crate::action::{Action, OllamaClient};
 use crate::config::OllamaConfig;
 
 #[cfg(feature = "model")]
-use crate::abi::model::{
-    check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
-    copy::{CopyModelRequest, CopyModelResponse},
-    create::{CreateModelRequest, CreateModelResponse},
-    delete::{DeleteModelRequest, DeleteModelResponse},
-    generate_embeddings::{GenerateEmbeddingsRequest, GenerateEmbeddingsResponse},
-    list_local::{ListLocalModelsRequest, ListLocalModelsResponse},
-    list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
-    pull::{PullModelRequest, PullModelResponse},
-    push::{PushModelRequest, PushModelResponse},
-    push_blob::{PushBlobRequest, PushBlobResponse},
-    show_info::{ShowModelInformationRequest, ShowModelInformationResponse},
+use crate::action::model::{
+    check_blob_exists::CheckBlobExistsAction, copy::CopyModelAction, create::CreateModelAction,
+    delete::DeleteModelAction, generate_embeddings::GenerateEmbeddingsAction,
+    list_local::ListLocalModelAction, list_running::ListRunningModelsAction, pull::PullModelAction,
+    push::PushModelAction, push_blob::PushBlobAction, show_info::ShowModelInformationAction,
 };
 
 pub struct Ollama {
@@ -190,8 +183,8 @@ impl Ollama {
     ///     .quantize("q4_K_M")
     ///     .await?;
     /// ```
-    pub fn create_model(&self, model: &str) -> Action<CreateModelRequest, CreateModelResponse> {
-        Action::<CreateModelRequest, CreateModelResponse>::new(self.client.clone(), model)
+    pub fn create_model<'a>(&self, model: &'a str) -> CreateModelAction<'a> {
+        CreateModelAction::new(self.client.clone(), model)
     }
 
     /// List models that are available locally.
@@ -208,8 +201,8 @@ impl Ollama {
     ///     println!("{}", model.name);
     /// }
     /// ```
-    pub fn list_local_models(&self) -> Action<ListLocalModelsRequest, ListLocalModelsResponse> {
-        Action::<ListLocalModelsRequest, ListLocalModelsResponse>::new(self.client.clone())
+    pub fn list_local_models(&self) -> ListLocalModelAction {
+        ListLocalModelAction::new(self.client.clone())
     }
 
     /// List models that are currently loaded into memory.
@@ -225,10 +218,8 @@ impl Ollama {
     ///     println!("{}", model.name);
     /// }
     /// ```
-    pub fn list_running_models(
-        &self,
-    ) -> Action<ListRunningModelsRequest, ListRunningModelsResponse> {
-        Action::<ListRunningModelsRequest, ListRunningModelsResponse>::new(self.client.clone())
+    pub fn list_running_models(&self) -> ListRunningModelsAction<'_> {
+        ListRunningModelsAction::new(self.client.clone())
     }
 
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
@@ -246,14 +237,8 @@ impl Ollama {
     /// let model_info = ollama.show_model_information("llama3.1:8b").await?;
     /// println!("{}", model_info.license);
     /// ```
-    pub fn show_model_information(
-        &self,
-        model: &str,
-    ) -> Action<ShowModelInformationRequest, ShowModelInformationResponse> {
-        Action::<ShowModelInformationRequest, ShowModelInformationResponse>::new(
-            self.client.clone(),
-            model,
-        )
+    pub fn show_model_information<'a>(&self, model: &'a str) -> ShowModelInformationAction<'a> {
+        ShowModelInformationAction::new(self.client.clone(), model)
     }
 
     /// Copy a model. Creates a model with another name from an existing model.
@@ -272,12 +257,8 @@ impl Ollama {
     ///     Err(e) => println!("Error copying model: {e}"),
     /// }
     /// ```
-    pub fn copy_model(
-        &self,
-        source: &str,
-        destination: &str,
-    ) -> Action<CopyModelRequest, CopyModelResponse> {
-        Action::<CopyModelRequest, CopyModelResponse>::new(self.client.clone(), source, destination)
+    pub fn copy_model<'a>(&self, source: &'a str, destination: &'a str) -> CopyModelAction<'a> {
+        CopyModelAction::new(self.client.clone(), source, destination)
     }
 
     /// Delete a model and its data.
@@ -298,8 +279,8 @@ impl Ollama {
     ///     Err(e) => println!("Error deleting model: {e}"),
     /// }
     /// ```
-    pub fn delete_model(&self, model: &str) -> Action<DeleteModelRequest, DeleteModelResponse> {
-        Action::<DeleteModelRequest, DeleteModelResponse>::new(self.client.clone(), model)
+    pub fn delete_model<'a>(&self, model: &'a str) -> DeleteModelAction<'a> {
+        DeleteModelAction::new(self.client.clone(), model)
     }
 
     /// Download a model from the ollama library. Cancelled pulls are resumed
@@ -348,8 +329,8 @@ impl Ollama {
     /// out.write(b"\n").await?;
     /// out.flush().await?;
     /// ```
-    pub fn pull_model(&self, model: &str) -> Action<PullModelRequest, PullModelResponse> {
-        Action::<PullModelRequest, PullModelResponse>::new(self.client.clone(), model)
+    pub fn pull_model<'a>(&self, model: &'a str) -> PullModelAction<'a> {
+        PullModelAction::new(self.client.clone(), model)
     }
 
     /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
@@ -380,8 +361,8 @@ impl Ollama {
     /// ```rust,ignore
     /// let resp = ollama.push_model("mattw/pygmalion:latest").await?;
     /// ```
-    pub fn push_model(&self, model: &str) -> Action<PushModelRequest, PushModelResponse> {
-        Action::<PushModelRequest, PushModelResponse>::new(self.client.clone(), model)
+    pub fn push_model<'a>(&self, model: &'a str) -> PushModelAction<'a> {
+        PushModelAction::new(self.client.clone(), model)
     }
 
     /// Generate embeddings from a model.
@@ -430,14 +411,8 @@ impl Ollama {
     ///     .input("About tiger sharks")
     ///     .await?;
     /// ```
-    pub fn generate_embeddings(
-        &self,
-        model: &str,
-    ) -> Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
-        Action::<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse>::new(
-            self.client.clone(),
-            model,
-        )
+    pub fn generate_embeddings<'a>(&self, model: &'a str) -> GenerateEmbeddingsAction<'a> {
+        GenerateEmbeddingsAction::new(self.client.clone(), model)
     }
 
     /// Ensures that the file blob (Binary Large Object) used with create a model exists on the server.
@@ -445,9 +420,6 @@ impl Ollama {
     ///
     /// # Parameters
     /// - `digest`: The SHA256 digest of the blob.
-    ///
-    /// # Returns
-    /// - `CheckBlobExistsResponse {}`
     ///
     /// # Errors
     /// - `OllamaError::BlobDoesNotExist`: The file blob does not exist.
@@ -463,11 +435,8 @@ impl Ollama {
     ///     Err(e) => println!("Error checking blob: {e}"),
     /// }
     /// ```
-    pub fn check_blob_exists(
-        &self,
-        digest: &str,
-    ) -> Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
-        Action::<CheckBlobExistsRequest, CheckBlobExistsResponse>::new(self.client.clone(), digest)
+    pub fn check_blob_exists<'a>(&self, digest: &'a str) -> CheckBlobExistsAction<'a> {
+        CheckBlobExistsAction::new(self.client.clone(), digest)
     }
 
     /// Push a file to the Ollama server to create a "blob" (Binary Large Object).
@@ -494,8 +463,8 @@ impl Ollama {
     ///     )
     ///     .await?;
     /// ```
-    pub fn push_blob(&self, file: &str, digest: &str) -> Action<PushBlobRequest, PushBlobResponse> {
-        Action::<PushBlobRequest, PushBlobResponse>::new(self.client.clone(), file, digest)
+    pub fn push_blob<'a>(&self, file: &'a str, digest: &'a str) -> PushBlobAction<'a> {
+        PushBlobAction::new(self.client.clone(), file, digest)
     }
 }
 
