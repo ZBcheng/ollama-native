@@ -82,7 +82,7 @@ pub trait IntoStream<Response> {
     async fn stream(mut self) -> Result<OllamaStream<Response>, OllamaError>;
 }
 
-pub trait OllamaRequest: Serialize + Send + Sync + 'static {
+pub trait OllamaRequest: Serialize + Send + Sync {
     fn path(&self) -> String;
 }
 
