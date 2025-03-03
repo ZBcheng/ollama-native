@@ -1,5 +1,6 @@
 use crate::action::completion::chat::ChatAction;
 use crate::action::completion::generate::GenerateAction;
+use crate::action::version::version::VersionAction;
 use crate::action::{Action, OllamaClient};
 use crate::config::OllamaConfig;
 
@@ -139,8 +140,8 @@ impl Ollama {
     /// let version = ollama.version().await?;
     /// println!("{}", version.version);
     /// ```
-    pub fn version(&self) -> Action<VersionRequest, VersionResponse> {
-        Action::<VersionRequest, VersionResponse>::new(self.client.clone())
+    pub fn version(&self) -> VersionAction<'_> {
+        VersionAction::new(self.client.clone())
     }
 }
 
