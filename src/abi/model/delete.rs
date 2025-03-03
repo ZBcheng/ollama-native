@@ -1,19 +1,15 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize)]
-pub struct DeleteModelRequest {
+pub struct DeleteModelRequest<'a> {
     /// Model name to delete.
-    pub model: String,
+    pub model: &'a str,
 }
 
-#[cfg(feature = "model")]
-#[derive(Debug, Clone, Default, Deserialize)]
-pub struct DeleteModelResponse {}
-
-impl OllamaRequest for DeleteModelRequest {
+impl<'a> OllamaRequest for DeleteModelRequest<'a> {
     fn path(&self) -> String {
         "/api/delete".to_string()
     }

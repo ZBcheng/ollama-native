@@ -1,31 +1,28 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::{
-    abi::model::delete::{DeleteModelRequest, DeleteModelResponse},
-    action::{Action, OllamaClient, OllamaRequest, parse_response},
+    abi::model::delete::DeleteModelRequest,
+    action::{OllamaClient, OllamaRequest, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<DeleteModelRequest, DeleteModelResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
-        let request = DeleteModelRequest {
-            model: model.to_string(),
-        };
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+pub struct DeleteModelAction<'a> {
+    ollama: OllamaClient,
+    request: DeleteModelRequest<'a>,
+}
+
+impl<'a> DeleteModelAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
+        let request = DeleteModelRequest { model };
+        Self { ollama, request }
     }
 }
 
 #[cfg(feature = "model")]
-impl IntoFuture for Action<DeleteModelRequest, DeleteModelResponse> {
-    type Output = Result<DeleteModelResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+impl<'a> IntoFuture for DeleteModelAction<'a> {
+    type Output = Result<(), OllamaError>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -42,7 +39,7 @@ impl IntoFuture for Action<DeleteModelRequest, DeleteModelResponse> {
                 .map_err(|e| OllamaError::RequestError(e))?;
 
             match reqwest_resp.status() {
-                StatusCode::OK => Ok(DeleteModelResponse::default()),
+                StatusCode::OK => Ok(()),
                 StatusCode::NOT_FOUND => Err(OllamaError::ModelDoesNotExist),
                 _code => {
                     let error: OllamaServerError = parse_response(reqwest_resp).await?;
