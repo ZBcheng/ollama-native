@@ -1,11 +1,9 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::{
     abi::model::push::{PushModelRequest, PushModelResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
@@ -17,31 +15,33 @@ use {
     tokio_stream::StreamExt,
 };
 
-impl Action<PushModelRequest, PushModelResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct PushModelAction<'a> {
+    ollama: OllamaClient,
+    request: PushModelRequest<'a>,
+}
+
+impl<'a> PushModelAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = PushModelRequest {
-            model: model.to_string(),
+            model,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 
     /// Allow insecure connections to the library.
     /// Only use this if you are pushing to your library during development.
+    #[inline]
     pub fn insecure(mut self) -> Self {
         self.request.insecure = Some(true);
         self
     }
 }
 
-impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
+impl<'a> IntoFuture for PushModelAction<'a> {
     type Output = Result<PushModelResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -59,7 +59,7 @@ impl IntoFuture for Action<PushModelRequest, PushModelResponse> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl IntoStream<PushModelResponse> for Action<PushModelRequest, PushModelResponse> {
+impl<'a> IntoStream<PushModelResponse> for PushModelAction<'a> {
     async fn stream(mut self) -> Result<OllamaStream<PushModelResponse>, OllamaError> {
         self.request.stream = true;
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();

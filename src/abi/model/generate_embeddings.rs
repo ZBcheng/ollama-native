@@ -4,12 +4,12 @@ use crate::{abi::Parameter, action::OllamaRequest};
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct GenerateEmbeddingsRequest {
+pub struct GenerateEmbeddingsRequest<'a> {
     /// Name of model to generate embeddings from.
-    pub model: String,
+    pub model: &'a str,
 
     /// List of text to generate embeddings for.
-    pub input: Vec<String>,
+    pub input: Vec<&'a str>,
 
     /// Truncates the end of each input to fit within context length.
     /// Returns error if `false` and context length is exceeded. Defaults to `true`.
@@ -30,7 +30,7 @@ pub struct GenerateEmbeddingsRequest {
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
-pub struct GenerateEmbeddingsResponse {
+pub struct GenerateEmbeddingResponse {
     pub model: String,
     pub embeddings: Vec<Vec<f64>>,
     pub total_duration: Option<i64>,
@@ -38,7 +38,14 @@ pub struct GenerateEmbeddingsResponse {
     pub prompt_eval_count: Option<i64>,
 }
 
-impl OllamaRequest for GenerateEmbeddingsRequest {
+#[cfg(feature = "model")]
+#[derive(Debug, Clone, Deserialize)]
+pub struct GenerateEmbeddingsResponse {
+    pub model: String,
+    pub embeddings: Vec<Vec<f64>>,
+}
+
+impl<'a> OllamaRequest for GenerateEmbeddingsRequest<'a> {
     fn path(&self) -> String {
         "/api/embed".to_string()
     }

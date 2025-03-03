@@ -224,3 +224,8 @@ This project is licensed under the [MIT license][license].
 [release]: https://github.com/ZBcheng/ollama-native/releases
 [crates-io]: https://crates.io/crates/ollama-native
 [license]: https://github.com/ZBcheng/ollama-native/blob/main/LICENSE
+
+## Acknowledgments
+Thanks mongodb for providing such an elegant design pattern.
+
+[Isabel Atkinson: “Rustify Your API: A Journey from Specification to Implementation” | RustConf 2024](https://www.youtube.com/watch?v=1nXW-mYGTiM)

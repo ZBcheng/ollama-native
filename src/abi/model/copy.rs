@@ -1,19 +1,15 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize)]
-pub struct CopyModelRequest {
-    pub source: String,
-    pub destination: String,
+pub struct CopyModelRequest<'a> {
+    pub source: &'a str,
+    pub destination: &'a str,
 }
 
-#[cfg(feature = "model")]
-#[derive(Debug, Deserialize, Default)]
-pub struct CopyModelResponse {}
-
-impl OllamaRequest for CopyModelRequest {
+impl<'a> OllamaRequest for CopyModelRequest<'a> {
     fn path(&self) -> String {
         "/api/copy".to_string()
     }

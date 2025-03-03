@@ -4,9 +4,9 @@ use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct PullModelRequest {
+pub struct PullModelRequest<'a> {
     /// Name of the model to pull.
-    pub model: String,
+    pub model: &'a str,
 
     /// Allow insecure connections to the library.
     /// Only use this if you are pulling from your own library during development.
@@ -26,7 +26,7 @@ pub struct PullModelResponse {
     pub completed: Option<i64>,
 }
 
-impl OllamaRequest for PullModelRequest {
+impl<'a> OllamaRequest for PullModelRequest<'a> {
     fn path(&self) -> String {
         "/api/pull".to_string()
     }

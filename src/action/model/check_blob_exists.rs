@@ -1,31 +1,28 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::{
-    abi::model::check_blob_exists::{CheckBlobExistsRequest, CheckBlobExistsResponse},
-    action::{Action, OllamaClient, OllamaRequest, parse_response},
+    abi::model::check_blob_exists::CheckBlobExistsRequest,
+    action::{OllamaClient, OllamaRequest, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
-    pub fn new(ollama: OllamaClient, digest: &str) -> Self {
-        let request = CheckBlobExistsRequest {
-            digest: digest.to_string(),
-        };
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+pub struct CheckBlobExistsAction<'a> {
+    ollama: OllamaClient,
+    request: CheckBlobExistsRequest<'a>,
+}
+
+impl<'a> CheckBlobExistsAction<'a> {
+    pub fn new(ollama: OllamaClient, digest: &'a str) -> Self {
+        let request = CheckBlobExistsRequest { digest };
+        Self { ollama, request }
     }
 }
 
 #[cfg(feature = "model")]
-impl IntoFuture for Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
-    type Output = Result<CheckBlobExistsResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+impl<'a> IntoFuture for CheckBlobExistsAction<'a> {
+    type Output = Result<(), OllamaError>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -37,7 +34,7 @@ impl IntoFuture for Action<CheckBlobExistsRequest, CheckBlobExistsResponse> {
                 .map_err(|e| OllamaError::RequestError(e))?;
 
             match reqwest_resp.status() {
-                StatusCode::OK => Ok(CheckBlobExistsResponse::default()),
+                StatusCode::OK => Ok(()),
                 StatusCode::NOT_FOUND => Err(OllamaError::BlobDoesNotExist),
                 _code => {
                     let error: OllamaServerError = parse_response(reqwest_resp).await?;

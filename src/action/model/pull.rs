@@ -1,5 +1,3 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
@@ -15,35 +13,37 @@ use {
 
 use crate::{
     abi::model::pull::{PullModelRequest, PullModelResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::OllamaServerError,
 };
 
-impl Action<PullModelRequest, PullModelResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct PullModelAction<'a> {
+    ollama: OllamaClient,
+    request: PullModelRequest<'a>,
+}
+
+impl<'a> PullModelAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = PullModelRequest {
-            model: model.to_string(),
+            model,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 
     /// Allow insecure connections to the library.
     /// Only use this if you are pulling from your own library during development.
+    #[inline]
     pub fn insecure(mut self) -> Self {
         self.request.insecure = Some(true);
         self
     }
 }
 
-impl IntoFuture for Action<PullModelRequest, PullModelResponse> {
+impl<'a> IntoFuture for PullModelAction<'a> {
     type Output = Result<PullModelResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -61,7 +61,7 @@ impl IntoFuture for Action<PullModelRequest, PullModelResponse> {
 
 #[cfg(feature = "stream")]
 #[async_trait]
-impl IntoStream<PullModelResponse> for Action<PullModelRequest, PullModelResponse> {
+impl<'a> IntoStream<PullModelResponse> for PullModelAction<'a> {
     async fn stream(mut self) -> Result<OllamaStream<PullModelResponse>, OllamaError> {
         self.request.stream = true;
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();

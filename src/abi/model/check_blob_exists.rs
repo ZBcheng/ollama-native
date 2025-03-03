@@ -1,18 +1,14 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Serialize)]
-pub struct CheckBlobExistsRequest {
-    pub digest: String,
+pub struct CheckBlobExistsRequest<'a> {
+    pub digest: &'a str,
 }
 
-#[cfg(feature = "model")]
-#[derive(Debug, Clone, Default, Deserialize)]
-pub struct CheckBlobExistsResponse {}
-
-impl OllamaRequest for CheckBlobExistsRequest {
+impl<'a> OllamaRequest for CheckBlobExistsRequest<'a> {
     fn path(&self) -> String {
         format!("/api/blobs/{}", self.digest.to_string())
     }

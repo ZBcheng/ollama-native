@@ -5,23 +5,29 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::version::version::{VersionRequest, VersionResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<VersionRequest, VersionResponse> {
+pub struct VersionAction<'a> {
+    ollama: OllamaClient,
+    request: VersionRequest,
+    _marker: &'a PhantomData<()>,
+}
+
+impl<'a> VersionAction<'a> {
     pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
             request: VersionRequest::default(),
-            _resp: PhantomData,
+            _marker: &PhantomData::<()>,
         }
     }
 }
 
-impl IntoFuture for Action<VersionRequest, VersionResponse> {
+impl<'a> IntoFuture for VersionAction<'a> {
     type Output = Result<VersionResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {

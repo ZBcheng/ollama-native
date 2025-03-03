@@ -4,7 +4,7 @@ pub mod version;
 #[cfg(feature = "model")]
 pub mod model;
 
-use std::{marker::PhantomData, sync::Arc};
+use std::sync::Arc;
 
 use reqwest::header::HeaderMap;
 use serde::{Serialize, de::DeserializeOwned};
@@ -67,12 +67,6 @@ impl OllamaClient {
     }
 }
 
-pub struct Action<Request: OllamaRequest, Response> {
-    pub ollama: OllamaClient,
-    pub request: Request,
-    pub _resp: PhantomData<Response>,
-}
-
 #[cfg(feature = "stream")]
 pub type OllamaStream<T> = Pin<Box<dyn Stream<Item = Result<T, OllamaError>>>>;
 
@@ -82,7 +76,7 @@ pub trait IntoStream<Response> {
     async fn stream(mut self) -> Result<OllamaStream<Response>, OllamaError>;
 }
 
-pub trait OllamaRequest: Serialize + Send + Sync + 'static {
+pub trait OllamaRequest: Serialize + Send + Sync {
     fn path(&self) -> String;
 }
 
