@@ -5,23 +5,29 @@ use reqwest::StatusCode;
 
 use crate::{
     abi::model::list_running::{ListRunningModelsRequest, ListRunningModelsResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<ListRunningModelsRequest, ListRunningModelsResponse> {
+pub struct ListRunningModelsAction<'a> {
+    ollama: OllamaClient,
+    request: ListRunningModelsRequest,
+    _marker: &'a PhantomData<()>,
+}
+
+impl<'a> ListRunningModelsAction<'a> {
     pub fn new(ollama: OllamaClient) -> Self {
         Self {
             ollama,
             request: ListRunningModelsRequest::default(),
-            _resp: PhantomData,
+            _marker: &PhantomData::<()>,
         }
     }
 }
 
-impl IntoFuture for Action<ListRunningModelsRequest, ListRunningModelsResponse> {
+impl<'a> IntoFuture for ListRunningModelsAction<'a> {
     type Output = Result<ListRunningModelsResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
