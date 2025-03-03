@@ -1,17 +1,14 @@
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 
 use crate::action::OllamaRequest;
 
 #[derive(Debug, Clone, Serialize)]
-pub struct PushBlobRequest {
-    pub file: String,
-    pub digest: String,
+pub struct PushBlobRequest<'a> {
+    pub file: &'a str,
+    pub digest: &'a str,
 }
 
-#[derive(Debug, Clone, Default, Deserialize)]
-pub struct PushBlobResponse {}
-
-impl OllamaRequest for PushBlobRequest {
+impl<'a> OllamaRequest for PushBlobRequest<'a> {
     fn path(&self) -> String {
         format!("/api/blobs/{}", self.digest)
     }

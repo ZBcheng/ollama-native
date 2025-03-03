@@ -1,33 +1,28 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 use tokio_util::codec::{BytesCodec, FramedRead};
 
 use crate::{
-    abi::model::push_blob::{PushBlobRequest, PushBlobResponse},
-    action::{Action, OllamaClient, OllamaRequest, parse_response},
+    abi::model::push_blob::PushBlobRequest,
+    action::{OllamaClient, OllamaRequest, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<PushBlobRequest, PushBlobResponse> {
-    pub fn new(ollama: OllamaClient, file: &str, digest: &str) -> Self {
-        let request = PushBlobRequest {
-            file: file.to_string(),
-            digest: digest.to_string(),
-        };
+pub struct PushBlobAction<'a> {
+    ollama: OllamaClient,
+    request: PushBlobRequest<'a>,
+}
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+impl<'a> PushBlobAction<'a> {
+    pub fn new(ollama: OllamaClient, file: &'a str, digest: &'a str) -> Self {
+        let request = PushBlobRequest { file, digest };
+        Self { ollama, request }
     }
 }
 
-impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
-    type Output = Result<PushBlobResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+impl<'a> IntoFuture for PushBlobAction<'a> {
+    type Output = Result<(), OllamaError>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
@@ -35,7 +30,7 @@ impl IntoFuture for Action<PushBlobRequest, PushBlobResponse> {
             let file_path = &self.request.file;
             let reqwest_resp = upload_file(self.ollama, &url, file_path).await?;
             match reqwest_resp.status() {
-                StatusCode::CREATED => Ok(PushBlobResponse::default()),
+                StatusCode::CREATED => Ok(()),
                 StatusCode::BAD_REQUEST => Err(OllamaError::UnexpectedDigest),
                 _code => {
                     let error: OllamaServerError = parse_response(reqwest_resp).await?;
