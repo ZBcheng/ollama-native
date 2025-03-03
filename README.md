@@ -1,7 +1,8 @@
 # ollama-native 🐑
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ZBcheng/ollama-native/rust.yml)
-![GitHub Release](https://img.shields.io/github/v/release/ZBcheng/ollama-native)
-![GitHub License](https://img.shields.io/github/license/ZBCheng/ollama-native)
+[![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/ZBcheng/ollama-native/rust.yml)](https://github.com/ZBcheng/ollama-native/blob/main/.github/workflows/rust.yml)
+[![GitHub Release](https://img.shields.io/github/v/release/ZBcheng/ollama-native)](https://github.com/ZBcheng/ollama-native/releases)
+[![Crates.io Version](https://img.shields.io/crates/v/ollama-native?color=%23D400FF)](https://crates.io/crates/ollama-native)
+[![GitHub License](https://img.shields.io/github/license/ZBCheng/ollama-native)](https://github.com/ZBcheng/ollama-native/blob/main/LICENSE)
 
 ollama-native is a minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama.
 
