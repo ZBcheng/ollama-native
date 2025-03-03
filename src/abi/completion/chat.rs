@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
-    abi::{Message, Parameter, Role},
+    abi::{Message, Parameter},
     action::OllamaRequest,
 };
 
@@ -15,11 +15,11 @@ pub struct ChatRequest<'a> {
 
     /// List of tools in JSON for the model to use if supported.
     #[serde(skip_serializing_if = "Vec::is_empty")]
-    pub tools: Vec<Tool>,
+    pub tools: Vec<Tool<'a>>,
 
     /// The foramt to return a response in. Format can be `json` or a JSON schema.
     #[serde(skip_serializing_if = "Option::is_none")]
-    pub format: Option<Format>,
+    pub format: Option<Format<'a>>,
 
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
@@ -37,7 +37,7 @@ pub struct ChatRequest<'a> {
     pub keep_alive: Option<i64>,
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChatResponse {
     /// The model name.
     pub model: String,
@@ -71,42 +71,33 @@ pub struct ChatResponse {
     pub eval_duration: Option<i64>,
 }
 
-#[derive(Debug, Clone, Deserialize)]
-pub struct ResponseMessage {
-    /// The role of the message, either `system`, `user`, `assistant`, or `tool`.
-    pub role: Role,
-
-    /// Response content.
-    pub content: String,
-}
-
 #[derive(Debug, Clone)]
-pub enum Tool {
-    Tool(String),
+pub struct Tool<'a>(&'a str);
+
+impl<'a> Tool<'a> {
+    pub fn new(inner: &'a str) -> Self {
+        Self(inner)
+    }
 }
 
-impl Serialize for Tool {
+impl<'a> Serialize for Tool<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        match *self {
-            Tool::Tool(ref s) => {
-                let schema_value: serde_json::Value = serde_json::from_str(s)
-                    .map_err(|e| serde::ser::Error::custom(format!("invalid tool format: {e}")))?;
-                schema_value.serialize(serializer)
-            }
-        }
+        let schema_value: serde_json::Value = serde_json::from_str(&self.0)
+            .map_err(|e| serde::ser::Error::custom(format!("invalid tool format: {e}")))?;
+        schema_value.serialize(serializer)
     }
 }
 
 #[derive(Debug, Clone)]
-pub enum Format {
+pub enum Format<'a> {
     Json,
-    Schema(String),
+    Schema(&'a str),
 }
 
-impl Serialize for Format {
+impl<'a> Serialize for Format<'a> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
