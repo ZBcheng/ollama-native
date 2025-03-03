@@ -10,7 +10,7 @@ pub struct VersionResponse {
     pub version: String,
 }
 
-impl<'a> OllamaRequest for VersionRequest<'a> {
+impl OllamaRequest for VersionRequest {
     fn path(&self) -> String {
         "/api/version".to_string()
     }
