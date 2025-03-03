@@ -1,39 +1,38 @@
-use std::marker::PhantomData;
-
 use futures::future::BoxFuture;
 use reqwest::StatusCode;
 
 use crate::{
     abi::model::generate_embeddings::{GenerateEmbeddingsRequest, GenerateEmbeddingsResponse},
-    action::{Action, OllamaClient, parse_response},
+    action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
-    pub fn new(ollama: OllamaClient, model: &str) -> Self {
+pub struct GenerateEmbeddingsAction<'a> {
+    ollama: OllamaClient,
+    request: GenerateEmbeddingsRequest<'a>,
+}
+
+impl<'a> GenerateEmbeddingsAction<'a> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = GenerateEmbeddingsRequest {
-            model: model.to_string(),
+            model: model,
             ..Default::default()
         };
 
-        Self {
-            ollama,
-            request,
-            _resp: PhantomData,
-        }
+        Self { ollama, request }
     }
 
     /// Text to generate embeddings for.
-    pub fn input(mut self, input: &str) -> Self {
-        self.request.input.push(input.to_string());
+    pub fn input(mut self, input: &'a str) -> Self {
+        self.request.input.push(input);
         self
     }
 
     /// List of text to generate embeddings for.
-    pub fn inputs(mut self, inputs: Vec<impl ToString>) -> Self {
+    pub fn inputs(mut self, inputs: Vec<&'a str>) -> Self {
         inputs
             .into_iter()
-            .for_each(|input| self.request.input.push(input.to_string()));
+            .for_each(|input| self.request.input.push(input));
         self
     }
 
@@ -155,9 +154,9 @@ impl Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
     }
 }
 
-impl IntoFuture for Action<GenerateEmbeddingsRequest, GenerateEmbeddingsResponse> {
+impl<'a> IntoFuture for GenerateEmbeddingsAction<'a> {
     type Output = Result<GenerateEmbeddingsResponse, OllamaError>;
-    type IntoFuture = BoxFuture<'static, Self::Output>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
         Box::pin(async move {
