@@ -727,7 +727,7 @@ dependencies = [
 
 [[package]]
 name = "ollama-native"
-version = "1.0.0"
+version = "1.0.1"
 dependencies = [
  "async-stream",
  "async-trait",
