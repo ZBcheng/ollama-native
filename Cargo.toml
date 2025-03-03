@@ -2,24 +2,24 @@
 name = "ollama-native"
 description = "A minimalist Ollama Rust SDK that provides the most basic functionality for interacting with Ollama"
 version = "1.0.1"
-edition = "2024"
 readme = "README.md"
 repository = "https://github.com/ZBcheng/ollama-native"
 license = "MIT"
 keywords = ["ollama"]
 authors = ["ZBcheng bee0_0@icloud.com"]
+edition = "2024"
 
 [dependencies]
-async-trait = { version = "0.1.86" }
+async-trait = { version = "0.1.87" }
 bytes = { version = "1.10.0", features = ["serde"] }
 futures = "0.3.31"
 serde = { version = "1.0.218", features = ["derive"] }
-serde_json = "1.0.139"
-thiserror = "2.0.11"
+serde_json = "1.0.140"
+thiserror = "2.0.12"
 reqwest = { version = "0.12.12", features = ["json"] }
 async-stream = { version = "0.3.6" }
-tokio = { version = "1.43.0", features = ["full"] }
-tokio-stream = { version = "0.1.17", features = ["full"], optional = true }
+tokio = "1.43.0"
+tokio-stream = { version = "0.1.17", optional = true }
 tokio-util = { version = "0.7.13", optional = true }
 
 [features]
@@ -28,5 +28,9 @@ model = ["reqwest/stream", "tokio-util"]
 
 [dev-dependencies]
 ollama-native = { path = ".", features = ["stream", "model"] }
-tokio = { version = "1.43.0", features = ["full"] }
-tokio-stream = { version = "0.1.17", features = ["full"] }
+tokio = { version = "1.43.0", features = [
+    "io-std",
+    "macros",
+    "test-util",
+    "rt-multi-thread",
+] }
