@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use futures::future::BoxFuture;
 use reqwest::{
     StatusCode,
@@ -6,7 +8,9 @@ use reqwest::{
 
 use crate::abi::{
     Message,
-    completion::chat::{ChatRequest, ChatResponse, Format, Tool},
+    completion::chat::{
+        ChatCompletionModelResponse, ChatCompletionRequest, ChatCompletionResponse, Format, Tool,
+    },
 };
 use crate::action::parse_response;
 use crate::error::OllamaError;
@@ -20,23 +24,43 @@ use {
     tokio_stream::StreamExt,
 };
 
-pub struct ChatAction<'a> {
-    request: ChatRequest<'a>,
+pub struct ChatAction<'a, R> {
+    request: ChatCompletionRequest<'a>,
     ollama: OllamaClient,
+    _resp: PhantomData<R>,
 }
 
-impl<'a> ChatAction<'a> {
-    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
-        let request = ChatRequest {
-            model,
-            messages: vec![],
-            ..Default::default()
-        };
-        Self { ollama, request }
+impl<'a> ChatAction<'a, ChatCompletionResponse> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> ChatAction<'a, ChatCompletionResponse> {
+        Self {
+            ollama,
+            request: ChatCompletionRequest::new(model),
+            _resp: PhantomData::<ChatCompletionResponse>,
+        }
     }
 }
 
-impl<'a> ChatAction<'a> {
+impl<'a> ChatAction<'a, ChatCompletionResponse> {
+    /// Load the model into memory.
+    #[inline]
+    pub fn load(self) -> ChatAction<'a, ChatCompletionModelResponse> {
+        ChatAction {
+            ollama: self.ollama,
+            request: self.request.to_load_model(),
+            _resp: PhantomData::<ChatCompletionModelResponse>,
+        }
+    }
+
+    /// Unload the model from memory.
+    #[inline]
+    pub fn unload(self) -> ChatAction<'a, ChatCompletionModelResponse> {
+        ChatAction {
+            ollama: self.ollama,
+            request: self.request.to_unload_model(),
+            _resp: PhantomData::<ChatCompletionModelResponse>,
+        }
+    }
+
     #[inline]
     pub fn messages(mut self, messages: Vec<Message>) -> Self {
         messages
@@ -53,19 +77,19 @@ impl<'a> ChatAction<'a> {
 
     #[inline]
     pub fn system_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_system(content));
+        self.request.messages.push(Message::system(content));
         self
     }
 
     #[inline]
     pub fn user_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_user(content));
+        self.request.messages.push(Message::user(content));
         self
     }
 
     #[inline]
     pub fn assistant_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_assistant(content));
+        self.request.messages.push(Message::assistant(content));
         self
     }
 
@@ -217,8 +241,8 @@ impl<'a> ChatAction<'a> {
     }
 }
 
-impl<'a> IntoFuture for ChatAction<'a> {
-    type Output = Result<ChatResponse, OllamaError>;
+impl<'a> IntoFuture for ChatAction<'a, ChatCompletionResponse> {
+    type Output = Result<ChatCompletionResponse, OllamaError>;
     type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
@@ -243,10 +267,28 @@ impl<'a> IntoFuture for ChatAction<'a> {
     }
 }
 
+impl<'a> IntoFuture for ChatAction<'a, ChatCompletionModelResponse> {
+    type Output = Result<ChatCompletionModelResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
+                }
+            }
+        })
+    }
+}
+
 #[cfg(feature = "stream")]
 #[async_trait]
-impl<'a> IntoStream<ChatResponse> for ChatAction<'a> {
-    async fn stream(mut self) -> Result<OllamaStream<ChatResponse>, OllamaError> {
+impl<'a> IntoStream<ChatCompletionResponse> for ChatAction<'a, ChatCompletionResponse> {
+    async fn stream(mut self) -> Result<OllamaStream<ChatCompletionResponse>, OllamaError> {
         self.request.stream = true;
 
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();

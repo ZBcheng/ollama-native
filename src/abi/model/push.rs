@@ -21,6 +21,13 @@ pub struct PushModelRequest<'a> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PushModelResponse {
     pub status: String,
+}
+
+#[cfg(feature = "model")]
+#[cfg(feature = "stream")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PushModelStreamingResponse {
+    pub status: String,
     pub digest: Option<String>,
     pub total: Option<i64>,
 }

@@ -15,7 +15,7 @@ pub struct GenerateEmbeddingsAction<'a> {
 impl<'a> GenerateEmbeddingsAction<'a> {
     pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
         let request = GenerateEmbeddingsRequest {
-            model: model,
+            model,
             ..Default::default()
         };
 

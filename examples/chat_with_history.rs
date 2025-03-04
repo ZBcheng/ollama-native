@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use ollama_native::{Message, Ollama, action::IntoStream};
+use ollama_native::{Ollama, abi::Message, action::IntoStream};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt},
     sync::RwLock,
@@ -46,8 +46,8 @@ impl Manager {
 
     async fn update_history(&self, input: &str, content: &str) {
         let mut history = self.history.write().await;
-        history.push(Message::new_user(input));
-        history.push(Message::new_assistant(content));
+        history.push(Message::user(input));
+        history.push(Message::assistant(content));
     }
 
     async fn load_history(&self) -> Vec<Message> {

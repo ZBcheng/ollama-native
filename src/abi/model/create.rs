@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-use crate::abi::{Message, Parameter};
+use crate::abi::{Message, Options};
 use crate::action::OllamaRequest;
 
 #[cfg(feature = "model")]
@@ -38,8 +38,8 @@ pub struct CreateModelRequest<'a> {
     /// A dictionary of parameters for the model (see
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
     /// for a list of parameters.
-    #[serde(skip_serializing_if = "Parameter::is_default")]
-    pub parameters: Parameter,
+    #[serde(skip_serializing_if = "Options::is_default")]
+    pub parameters: Options,
 
     /// A list of message objects used to create a conversation.
     #[serde(skip_serializing_if = "Vec::is_empty")]

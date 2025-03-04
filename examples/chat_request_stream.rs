@@ -1,6 +1,7 @@
 use ollama_native::{
-    Message, Ollama,
-    abi::completion::chat::ChatResponse,
+    Ollama,
+    abi::Message,
+    abi::completion::chat::ChatCompletionResponse,
     action::{IntoStream, OllamaStream},
 };
 use tokio::io::AsyncWriteExt;
@@ -9,7 +10,7 @@ use tokio_stream::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define a helper function to print the responses.
-    let print_stream = async |mut stream: OllamaStream<ChatResponse>| {
+    let print_stream = async |mut stream: OllamaStream<ChatCompletionResponse>| {
         let mut out = tokio::io::stdout();
         while let Some(Ok(item)) = stream.next().await {
             let content = item.message.unwrap().content;
@@ -33,8 +34,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Or use the `messages` method to pass multiple messages at once.
     let messages = vec![
-        Message::new_system("You are a robot that is good at telling jokes"),
-        Message::new_user("Who are you"),
+        Message::system("You are a robot that is good at telling jokes"),
+        Message::user("Who are you"),
     ];
 
     let stream = ollama

@@ -21,6 +21,12 @@ pub struct PullModelRequest<'a> {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PullModelResponse {
     pub status: String,
+}
+
+#[cfg(feature = "model")]
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PullModelStreamingResponse {
+    pub status: String,
     pub digest: Option<String>,
     pub total: Option<i64>,
     pub completed: Option<i64>,

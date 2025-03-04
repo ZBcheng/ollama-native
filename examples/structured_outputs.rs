@@ -1,4 +1,4 @@
-use ollama_native::{Ollama, OllamaError};
+use ollama_native::{Ollama, error::OllamaError};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -6,16 +6,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // JSON mode
     let resposne = ollama
-        .generate(
-            "llama3.1:8b",
-            "Ollama is 22 years old and is busy saving the world. Respond using JSON",
-        )
-        .format("json") // Use "json" to get the response in JSON format.
+        .generate("llama3.1:8b")
+        .prompt("Ollama is 22 years old and is busy saving the world. Respond using JSON")
+        .json() // Get the response in JSON format.
         .await?;
     println!("JSON mode:\n{}\n", resposne.response);
 
     // Specified JSON format.
-    let output_format = r#"
+    let format = r#"
     {
         "type": "object",
         "properties": {
@@ -32,24 +30,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ]
     }"#;
     let resposne = ollama
-        .generate(
-            "llama3.1:8b",
-            "Ollama is 22 years old and is busy saving the world. Respond using JSON",
-        )
-        .format(&output_format)
+        .generate("llama3.1:8b")
+        .prompt("Ollama is 22 years old and is busy saving the world. Respond using JSON")
+        .format(format)
         .await?;
 
     println!("structured JSON output:\n{}\n", resposne.response);
 
     // If the output format is an invalid JSON format, an error will be returned.
-    let invalid_output_format = r"invalid format";
+    let invalid_output_format = r"invalid JSON format";
     match ollama
-        .generate("llama3.1:8b", "Tell me a joke about sharks")
+        .generate("llama3.1:8b")
+        .prompt("Tell me a joke about sharks")
         .format(invalid_output_format)
         .await
     {
         Ok(_) => println!("This should not happen"),
-        Err(OllamaError::InvalidFormat(e)) => println!("Got error: {}", e), // OllamaError::InvalidFormat("invalid format schema: expected value at line 1 column 1".to_string())
+        Err(OllamaError::InvalidFormat(e)) => println!("Got error: {}", e), // OllamaError::InvalidFormat("invalid JSON schema: expected value at line 1 column 1".to_string())
         Err(e) => println!("Unexpected error: {}", e),
     }
 

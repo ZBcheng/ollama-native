@@ -1,3 +1,5 @@
+use std::marker::PhantomData;
+
 use futures::future::BoxFuture;
 use reqwest::{
     StatusCode,
@@ -15,30 +17,58 @@ use {
 use crate::{
     abi::completion::{
         chat::Format,
-        generate::{GenerateRequest, GenerateResponse},
+        generate::{
+            GenerateCompletionModelResponse, GenerateCompletionRequest, GenerateCompletionResponse,
+        },
     },
     action::{OllamaClient, parse_response},
     error::{OllamaError, OllamaServerError},
 };
 
-pub struct GenerateAction<'a> {
+pub struct GenerateAction<'a, R> {
     ollama: OllamaClient,
-    request: GenerateRequest<'a>,
+    request: GenerateCompletionRequest<'a>,
+    _resp: PhantomData<R>,
 }
 
-impl<'a> GenerateAction<'a> {
-    pub fn new(ollama: OllamaClient, model: &'a str, prompt: &'a str) -> Self {
-        let request = GenerateRequest {
-            model: model,
-            prompt: prompt,
-            ..Default::default()
-        };
-
-        Self { ollama, request }
+impl<'a> GenerateAction<'a, GenerateCompletionResponse> {
+    pub fn new(ollama: OllamaClient, model: &'a str) -> Self {
+        Self {
+            ollama,
+            request: GenerateCompletionRequest::new(model),
+            _resp: PhantomData::<GenerateCompletionResponse>,
+        }
     }
 }
 
-impl<'a> GenerateAction<'a> {
+impl<'a> GenerateAction<'a, GenerateCompletionResponse> {
+    /// The prompt to generate a response for.
+    #[inline]
+    pub fn prompt(mut self, prompt: &'a str) -> Self {
+        self.request.prompt = Some(prompt);
+        self
+    }
+
+    /// Load the model into memory.
+    #[inline]
+    pub fn load(self) -> GenerateAction<'a, GenerateCompletionModelResponse> {
+        GenerateAction {
+            ollama: self.ollama,
+            request: self.request.to_load_model(),
+            _resp: PhantomData::<GenerateCompletionModelResponse>,
+        }
+    }
+
+    /// Unload the model from memory.
+    #[inline]
+    pub fn unload(self) -> GenerateAction<'a, GenerateCompletionModelResponse> {
+        GenerateAction {
+            ollama: self.ollama,
+            request: self.request.to_unload_model(),
+            _resp: PhantomData::<GenerateCompletionModelResponse>,
+        }
+    }
+
     /// The text after the model response.
     #[inline]
     pub fn suffix(mut self, suffix: &'a str) -> Self {
@@ -61,14 +91,17 @@ impl<'a> GenerateAction<'a> {
         self
     }
 
-    /// Return a response in JSON format.
+    /// Return a response in given JSON format.
     #[inline]
     pub fn format(mut self, format: &'a str) -> Self {
-        let fmt = match format.to_lowercase().as_str() {
-            "json" => Format::Json,
-            _ => Format::Schema(format),
-        };
-        self.request.format = Some(fmt);
+        self.request.format = Some(Format::Schema(format));
+        self
+    }
+
+    /// Return a response in JSON format.
+    #[inline]
+    pub fn json(mut self) -> Self {
+        self.request.format = Some(Format::Json);
         self
     }
 
@@ -217,8 +250,8 @@ impl<'a> GenerateAction<'a> {
     }
 }
 
-impl<'a> IntoFuture for GenerateAction<'a> {
-    type Output = Result<GenerateResponse, OllamaError>;
+impl<'a> IntoFuture for GenerateAction<'a, GenerateCompletionResponse> {
+    type Output = Result<GenerateCompletionResponse, OllamaError>;
     type IntoFuture = BoxFuture<'a, Self::Output>;
 
     fn into_future(self) -> Self::IntoFuture {
@@ -243,10 +276,28 @@ impl<'a> IntoFuture for GenerateAction<'a> {
     }
 }
 
+impl<'a> IntoFuture for GenerateAction<'a, GenerateCompletionModelResponse> {
+    type Output = Result<GenerateCompletionModelResponse, OllamaError>;
+    type IntoFuture = BoxFuture<'a, Self::Output>;
+
+    fn into_future(self) -> Self::IntoFuture {
+        Box::pin(async move {
+            let reqwest_resp = self.ollama.post(&self.request, None).await?;
+            match reqwest_resp.status() {
+                StatusCode::OK => parse_response(reqwest_resp).await,
+                _code => {
+                    let error: OllamaServerError = parse_response(reqwest_resp).await?;
+                    Err(OllamaError::OllamaServerError(error.error))
+                }
+            }
+        })
+    }
+}
+
 #[cfg(feature = "stream")]
 #[async_trait]
-impl<'a> IntoStream<GenerateResponse> for GenerateAction<'a> {
-    async fn stream(mut self) -> Result<OllamaStream<GenerateResponse>, OllamaError> {
+impl<'a> IntoStream<GenerateCompletionResponse> for GenerateAction<'a, GenerateCompletionResponse> {
+    async fn stream(mut self) -> Result<OllamaStream<GenerateCompletionResponse>, OllamaError> {
         self.request.stream = true;
         let mut reqwest_stream = self.ollama.post(&self.request, None).await?.bytes_stream();
 

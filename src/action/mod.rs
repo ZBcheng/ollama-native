@@ -4,8 +4,6 @@ pub mod version;
 #[cfg(feature = "model")]
 pub mod model;
 
-use std::sync::Arc;
-
 use reqwest::header::HeaderMap;
 use serde::{Serialize, de::DeserializeOwned};
 
@@ -18,13 +16,12 @@ use {async_trait::async_trait, futures::Stream, std::pin::Pin};
 #[derive(Clone)]
 pub struct OllamaClient {
     pub cli: reqwest::Client,
-    pub config: Arc<OllamaConfig>,
+    pub config: OllamaConfig,
 }
 
 impl OllamaClient {
     pub fn new(config: OllamaConfig) -> Self {
         let cli = reqwest::Client::new();
-        let config = Arc::new(config);
         Self { cli, config }
     }
 

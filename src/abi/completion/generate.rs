@@ -2,17 +2,17 @@ use std::fmt::Debug;
 
 use serde::{Deserialize, Serialize};
 
-use crate::{abi::Parameter, action::OllamaRequest};
+use crate::{abi::Options, action::OllamaRequest};
 
 use super::chat::Format;
 
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct GenerateRequest<'a> {
+pub struct GenerateCompletionRequest<'a> {
     /// The model name.
     pub model: &'a str,
 
     /// The prompt to generate a response for.
-    pub prompt: &'a str,
+    pub prompt: Option<&'a str>,
 
     /// The text after the model response.
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -29,8 +29,8 @@ pub struct GenerateRequest<'a> {
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
     /// such as `temperature`.
-    #[serde(skip_serializing_if = "Parameter::is_default")]
-    pub options: Parameter,
+    #[serde(skip_serializing_if = "Options::is_default")]
+    pub options: Options,
 
     /// System message to (overrides what is defined in the `Modelfile`).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -54,7 +54,7 @@ pub struct GenerateRequest<'a> {
 }
 
 #[derive(Debug, Clone, Deserialize)]
-pub struct GenerateResponse {
+pub struct GenerateCompletionResponse {
     /// The model name.
     pub model: String,
 
@@ -91,7 +91,45 @@ pub struct GenerateResponse {
     pub eval_duration: Option<i64>,
 }
 
-impl<'a> OllamaRequest for GenerateRequest<'a> {
+impl<'a> GenerateCompletionRequest<'a> {
+    #[inline]
+    pub fn new(model: &'a str) -> Self {
+        Self {
+            model,
+            ..Default::default()
+        }
+    }
+
+    #[inline]
+    pub fn to_load_model(mut self) -> Self {
+        self = Self {
+            model: self.model,
+            ..Default::default()
+        };
+        self
+    }
+
+    #[inline]
+    pub fn to_unload_model(mut self) -> Self {
+        self = Self {
+            model: self.model,
+            keep_alive: Some(0),
+            ..Default::default()
+        };
+        self
+    }
+}
+
+#[derive(Debug, Clone, Default, Deserialize)]
+pub struct GenerateCompletionModelResponse {
+    pub model: String,
+    pub created_at: String,
+    pub response: String,
+    pub done: bool,
+    pub done_reason: String,
+}
+
+impl<'a> OllamaRequest for GenerateCompletionRequest<'a> {
     fn path(&self) -> String {
         "/api/generate".to_string()
     }
