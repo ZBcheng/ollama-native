@@ -23,7 +23,7 @@ pub struct Message {
     pub tool_calls: Option<Vec<serde_json::Value>>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(rename_all = "lowercase")]
 pub enum Role {
     System,
@@ -96,7 +96,7 @@ impl Message {
 }
 
 #[derive(Debug, Clone, Default, Serialize, PartialEq)]
-pub struct Parameter {
+pub struct Options {
     /// Enable Mirostat sampling for controlling perplexity.
     /// (default: 0, 0 = disabled, 1 = Mirostat, 2 = Mirostat 2.0).
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -174,7 +174,7 @@ pub struct Parameter {
     pub min_p: Option<f64>,
 }
 
-impl Parameter {
+impl Options {
     #[inline]
     pub fn mirostat(&mut self, mirostat: u8) {
         self.mirostat = Some(mirostat);
@@ -247,11 +247,11 @@ impl Parameter {
 
 #[cfg(test)]
 mod tests {
-    use super::Parameter;
+    use super::Options;
 
     #[test]
     fn is_default_should_work() {
-        let mut p = Parameter::default();
+        let mut p = Options::default();
         assert!(p.is_default());
         p.mirostat = Some(1);
         assert!(!p.is_default());
