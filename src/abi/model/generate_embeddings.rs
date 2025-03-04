@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{abi::Parameter, action::OllamaRequest};
+use crate::{abi::Options, action::OllamaRequest};
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Default, Serialize)]
@@ -19,8 +19,8 @@ pub struct GenerateEmbeddingsRequest<'a> {
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
     /// such as `temperature`.
-    #[serde(skip_serializing_if = "Parameter::is_default")]
-    pub options: Parameter,
+    #[serde(skip_serializing_if = "Options::is_default")]
+    pub options: Options,
 
     /// Controls how long the model will stay loaded into memory following the request
     /// (default: 5m).
@@ -30,19 +30,12 @@ pub struct GenerateEmbeddingsRequest<'a> {
 
 #[cfg(feature = "model")]
 #[derive(Debug, Clone, Deserialize)]
-pub struct GenerateEmbeddingResponse {
+pub struct GenerateEmbeddingsResponse {
     pub model: String,
     pub embeddings: Vec<Vec<f64>>,
     pub total_duration: Option<i64>,
     pub load_duration: Option<i64>,
     pub prompt_eval_count: Option<i64>,
-}
-
-#[cfg(feature = "model")]
-#[derive(Debug, Clone, Deserialize)]
-pub struct GenerateEmbeddingsResponse {
-    pub model: String,
-    pub embeddings: Vec<Vec<f64>>,
 }
 
 impl<'a> OllamaRequest for GenerateEmbeddingsRequest<'a> {
