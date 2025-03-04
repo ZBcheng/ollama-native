@@ -197,7 +197,7 @@ let resposne = ollama
         "llama3.1:8b",
         "Ollama is 22 years old and is busy saving the world.",
     )
-    .format(&output_format)
+    .format(format)
     .await?;
 ```
 
