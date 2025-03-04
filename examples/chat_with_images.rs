@@ -1,4 +1,4 @@
-use ollama_native::{Message, Ollama};
+use ollama_native::{Ollama, abi::Message};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use ollama_native::{Message, Ollama, action::IntoStream};
+use ollama_native::{Ollama, abi::Message, action::IntoStream};
 use tokio::{
     io::{AsyncBufReadExt, AsyncWriteExt},
     sync::RwLock,

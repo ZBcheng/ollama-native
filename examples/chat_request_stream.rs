@@ -1,5 +1,6 @@
 use ollama_native::{
-    Message, Ollama,
+    Ollama,
+    abi::Message,
     abi::completion::chat::ChatCompletionResponse,
     action::{IntoStream, OllamaStream},
 };

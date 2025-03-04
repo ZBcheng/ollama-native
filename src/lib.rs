@@ -4,10 +4,8 @@ pub mod config;
 pub mod error;
 pub mod ollama;
 
-pub use error::OllamaError;
 pub use ollama::Ollama;
 
-pub use abi::Message;
 pub use abi::completion::{
     chat::{ChatCompletionModelResponse, ChatCompletionResponse},
     generate::{GenerateCompletionModelResponse, GenerateCompletionResponse},
