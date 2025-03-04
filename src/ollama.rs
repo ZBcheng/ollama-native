@@ -40,20 +40,26 @@ impl Ollama {
     ///
     /// # Parameters
     /// - `model`: The model to use for generating the response.
-    /// - `prompt`: The prompt to generate a response for.
     ///
     /// # Methods
+    /// - `prompt`: The prompt to generate a response for.
     /// - `suffix`: The text after the model response.
     /// - `image`: Insert a base64-encoded image to image list.
     /// - `images`: Insert a list of base64-encoded images (for multimodal models such as `llava`) to image list.
     /// - `format`: The format to return a response in. Format can be `json` or a JSON schema.
-    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `options`: Additional model parameters listed in [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values) such as `temperature`.
     /// - `system`: System message to (overrides what is defined in the `Modelfile`).
     /// - `template`: The prompt template to use (overrides what is defined in the `Modelfile`).
     /// - `raw`: If specified no formatting will be applied to the prompt.
     /// You may choose to use the `raw` parameter if you are specifying a full templated prompt in your request to the API.
     /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
     /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    /// - `load`: Load a model into memory, this method will convert the reponse into [GenerateCompletionModelResponse][`crate::abi::completion::generate::GenerateCompletionResponse`].
+    /// - `unload`: Unload a model from memory, this method will convert the reponse into [GenerateCompletionModelResponse][`crate::abi::completion::generate::GenerateCompletionResponse`].
+    ///
+    /// # Returns
+    /// - [GenerateCompletionResponse][`crate::abi::completion::generate::GenerateCompletionResponse`]: If `load` or `unload` is not specified.
+    /// - [GenerateCompletionModelResponse][`crate::abi::completion::generate::GenerateCompletionModelResponse`]: If `load` or `unload` is specified.
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -63,18 +69,26 @@ impl Ollama {
     /// # Examples
     /// Basic usage.
     /// ```rust,ignore
-    /// let response = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").await?;
+    /// let response = ollama
+    ///     .generate("llama3.1:8b")
+    ///     .prompt("Tell me a joke about sharks")
+    ///     .await?;
     /// ```
     /// Streaming response.
     /// ```rust,ignore
     /// use ollama_native::action::IntoStream;
     ///
-    /// let stream = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").stream().await?;
+    /// let stream = ollama
+    ///     .generate("llama3.1:8b")
+    ///     .prompt("Tell me a joke about sharks")
+    ///     .stream()
+    ///     .await?;
     /// ```
     /// With additional parameters (methods).
     /// ```rust,ignore
     /// let response = ollama
-    ///     .generate("llama3.1:8b", "Tell me a joke about sharks")
+    ///     .generate("llama3.1:8b")
+    ///     .prompt( "Tell me a joke about sharks")
     ///     .json() // Specify the format of the response
     ///     .seed(42) // Set the seed for the model
     ///     .await?;
@@ -96,9 +110,16 @@ impl Ollama {
     /// - `tool`: Insert a tool in JSON for the model to use if supported.
     /// - `tools`: Insert a list of tools in JSON for the model to use if supported.
     /// - `format`: The format to return a response in. Format can be `json` or a JSON schema.
-    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `options`: Additional model parameters listed in [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values) such as `temperature`.
     /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
     /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    /// - `load`: Load a model into memory, this method will convert the reponse into [ChatCompletionModelResponse][`crate::abi::completion::chat::ChatCompletionResponse`].
+    /// - `unload`: Unload a model from memory, this method will convert the reponse into [ChatCompletionModelResponse][`crate::abi::completion::chat::ChatCompletionResponse`].
+    ///
+    /// # Returns
+    /// - [ChatCompletionResponse][`crate::abi::completion::chat::ChatCompletionResponse`]: If `load` or `unload` is not specified.
+    /// - [ChatCompletionModelResponse][`crate::abi::completion::chat::ChatCompletionModelResponse`]: If `load` or `unload` is specified.
+    ///
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -200,6 +221,9 @@ impl Ollama {
 
     /// List models that are available locally.
     ///
+    /// # Returns
+    /// [ListLocalModelsResponse][`crate::abi::model::list_local::ListLocalModelsResponse`]
+    ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
@@ -222,6 +246,9 @@ impl Ollama {
     /// - `OllamaError::DecodeError`: There is an error decoding the response.
     /// - `OllamaError::OllamaServerError`: There is an error with the Ollama server.
     ///
+    /// # Returns
+    /// [ListRunningModelsResponse][`crate::abi::model::list_running::ListRunningModelsResponse`]
+    ///
     /// # Example
     /// ```rust,ignore
     /// let models = ollama.list_running_models().await?;
@@ -239,6 +266,10 @@ impl Ollama {
     ///
     /// # Method
     /// - `verbose`: If specified, returns full data for verbose response fields.
+    ///
+    /// # Returns
+    /// [ShowModelInformationResponse][`crate::abi::model::show_info::ShowModelInformationResponse`]
+    ///
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -307,17 +338,17 @@ impl Ollama {
     /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
-    /// **If `stream` is not specified, a single response object is returned:**
-    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`
+    /// **If `stream` is not specified, a single [PullModelResponse][`crate::abi::model::pull::PullModelResponse`] response object is returned:**
+    /// - `PullModelResponse { status: "success" }`
     ///
-    /// **If `stream` is specified, a stream of JSON objects is returned:**
-    /// - `PullModelResponse { status: "pulling manifest" }`<br>
-    /// - `PullModelResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`<br>
+    /// **If `stream` is specified, a stream of [PullModelStreamingResponse][`crate::abi::model::pull::PullModelStreamingResponse`] objects is returned:**
+    /// - `PullModelStreamingResponse { status: "pulling manifest" }`<br>
+    /// - `PullModelStreamingResponse { status: "downloading digestname", digest: Some("digestname"), total: Some(2142590208), completed: Some(241970) }`<br>
     /// - `...`<br>
-    /// - `PullModelResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`<br>
-    /// - `PullModelResponse { status: "writing manifest", digest: None, total: None, completed: None }`<br>
-    /// - `PullModelResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`<br>
-    /// - `PullModelResponse { status: "success", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelStreamingResponse { status: "verifying sha256 digest", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelStreamingResponse { status: "writing manifest", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelStreamingResponse { status: "removing any unused layers", digest: None, total: None, completed: None }`<br>
+    /// - `PullModelStreamingResponse { status: "success", digest: None, total: None, completed: None }`<br>
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -354,15 +385,15 @@ impl Ollama {
     /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
-    /// **If `stream` is not specified, a single response object is returned:**<br>
-    /// - `PushModelResponse { status: "success", digest: None, total: None }`
+    /// **If `stream` is not specified, a single [PushModelResponse][`crate::abi::model::push::PushModelResponse`] response object is returned:**<br>
+    /// - `PushModelResponse { status: "success" }`
     ///
-    /// **If `stream` is specified, a stream of JSON objects is returned:**<br>
-    /// - `PushModelResponse { status: "retrieving manifest", digest: None, total: None }`<br>
-    /// - `PushModelResponse { status: "starting upload", digest: Some("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab"), total: Some(1928429856) }`<br>
-    /// - `PushModelResponse { status: "pushing manifest", digest: None, total: None }`<br>
+    /// **If `stream` is specified, a stream of [PushModelStreamingResponse][`crate::abi::model::push::PushModelStreamingResponse`] objects is returned:**<br>
+    /// - `PushModelStreamingResponse { status: "retrieving manifest", digest: None, total: None }`<br>
+    /// - `PushModelStreamingResponse { status: "starting upload", digest: Some("sha256:bc07c81de745696fdf5afca05e065818a8149fb0c77266fb584d9b2cba3711ab"), total: Some(1928429856) }`<br>
+    /// - `PushModelStreamingResponse { status: "pushing manifest", digest: None, total: None }`<br>
     /// - `...`<br>
-    /// - `PushModelResponse { status: "success", digest: None, total: None }`
+    /// - `PushModelStreamingResponse { status: "success", digest: None, total: None }`
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -386,7 +417,7 @@ impl Ollama {
     /// # Methods
     /// - `input`: A list of text to generate embeddings for.
     /// - `truncate`: Truncates the end of each input to fit within context length. Returns error if `false` and context length is exceeded. Defaults to `true`.
-    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `options`: Additional model parameters listed in [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values) such as `temperature`.
     /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
     ///
     /// # Returns
@@ -489,7 +520,7 @@ mod tests {
 
     use crate::{
         Ollama,
-        abi::Message,
+        abi::{Message, Role},
         action::{IntoStream, OllamaStream},
     };
 
@@ -497,8 +528,62 @@ mod tests {
     #[ignore]
     async fn generate_should_work() {
         let ollama = Ollama::new(mock_config());
-        let resp = ollama.generate("llama3.1:8b", "hello").await.unwrap();
+        let resp = ollama
+            .generate("llama3.1:8b")
+            .prompt("hello")
+            .await
+            .unwrap();
         println!("{:?}", resp);
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn generate_load_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let model = "llama3.1:8b";
+        let resp = ollama.generate(model).load().await.unwrap();
+        assert_eq!(resp.model, model);
+        assert_eq!(resp.done, true);
+        assert_eq!(resp.response, "");
+        assert_eq!(resp.done_reason, "load");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn generate_unload_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let model = "llama3.1:8b";
+        let resp = ollama.generate(model).unload().await.unwrap();
+        assert_eq!(resp.model, model);
+        assert_eq!(resp.done, true);
+        assert_eq!(resp.response, "");
+        assert_eq!(resp.done_reason, "unload");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn chat_load_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let model = "llama3.1:8b";
+        let resp = ollama.chat(model).load().await.unwrap();
+        assert_eq!(resp.model, model);
+        assert_eq!(resp.done, true);
+        assert_eq!(resp.message.role, Role::Assistant);
+        assert_eq!(resp.message.content, "");
+        assert_eq!(resp.done_reason, "load");
+    }
+
+    #[tokio::test]
+    #[ignore]
+    async fn chat_unload_model_should_work() {
+        let ollama = Ollama::new(mock_config());
+        let model = "llama3.1:8b";
+        let resp = ollama.chat(model).unload().await.unwrap();
+        assert_eq!(resp.model, model);
+        assert_eq!(resp.done, true);
+        assert_eq!(resp.message.role, Role::Assistant);
+        assert_eq!(resp.message.content, "");
+        assert_eq!(resp.done_reason, "unload");
     }
 
     #[tokio::test]
@@ -506,7 +591,8 @@ mod tests {
     async fn generate_stream_should_work() {
         let ollama = Ollama::new(mock_config());
         let mut s = ollama
-            .generate("llama3.1:8b", "Tell me a joke about sharks")
+            .generate("llama3.1:8b")
+            .prompt("Tell me a joke about sharks")
             .stream()
             .await
             .unwrap();
