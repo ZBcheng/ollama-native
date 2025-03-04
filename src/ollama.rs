@@ -1,7 +1,7 @@
-use crate::action::OllamaClient;
-use crate::action::completion::chat::ChatAction;
-use crate::action::completion::generate::GenerateAction;
-use crate::action::version::version::VersionAction;
+use crate::action::{
+    OllamaClient, completion::chat::ChatAction, completion::generate::GenerateAction,
+    version::version::VersionAction,
+};
 use crate::config::OllamaConfig;
 
 #[cfg(feature = "model")]
@@ -40,16 +40,19 @@ impl Ollama {
     /// # Parameters
     /// - `model`: The model to use for generating the response.
     /// - `prompt`: The prompt to generate a response for.
-    /// - `suffix`: (optional) The text after the model response.
-    /// - `images`: (optional) A list of base64-encoded images (for multimodal models such as `llava`).
-    /// - `format`: (optional) The format to return a response in. Format can be `json` or a JSON schema.
-    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as temperature.
-    /// - `system`: (optional) System message to (overrides what is defined in the `Modelfile`).
-    /// - `template`: (optional) The prompt template to use (overrides what is defined in the `Modelfile`).
-    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
-    /// - `raw`: (optional) If specified no formatting will be applied to the prompt.
+    ///
+    /// # Methods
+    /// - `suffix`: The text after the model response.
+    /// - `image`: Insert a base64-encoded image to image list.
+    /// - `images`: Insert a list of base64-encoded images (for multimodal models such as `llava`) to image list.
+    /// - `format`: The format to return a response in. Format can be `json` or a JSON schema.
+    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `system`: System message to (overrides what is defined in the `Modelfile`).
+    /// - `template`: The prompt template to use (overrides what is defined in the `Modelfile`).
+    /// - `raw`: If specified no formatting will be applied to the prompt.
     /// You may choose to use the `raw` parameter if you are specifying a full templated prompt in your request to the API.
-    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
+    /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
+    /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -67,7 +70,7 @@ impl Ollama {
     ///
     /// let stream = ollama.generate("llama3.1:8b", "Tell me a joke about sharks").stream().await?;
     /// ```
-    /// With additional parameters.
+    /// With additional parameters (methods).
     /// ```rust,ignore
     /// let response = ollama
     ///     .generate("llama3.1:8b", "Tell me a joke about sharks")
@@ -83,14 +86,18 @@ impl Ollama {
     /// so there will be a series of responses. The final response object will include statistics and
     /// additional data from the request.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `model`: The model to use for generating the response.
-    /// - `messages`: The messages of the chat.
-    /// - `tools`: (optional) List of tools in JSON for the model to use if supported
-    /// - `format`: (optional) The format to return a response in. Format can be `json` or a JSON schema.
-    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as `temperature`.
-    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
-    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Methods
+    /// - `message`: Insert a message to message list.
+    /// - `messages`: Insert messages to message list.
+    /// - `tool`: Insert a tool in JSON for the model to use if supported.
+    /// - `tools`: Insert a list of tools in JSON for the model to use if supported.
+    /// - `format`: The format to return a response in. Format can be `json` or a JSON schema.
+    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
+    /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -149,18 +156,20 @@ impl Ollama {
     /// a blob` for each of the files and then use the file name and SHA256 digest associated with each
     /// blob in the files field.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `model`: The model to create.
-    /// - `from`: (optional) Name of an existing model to create the new model from.
-    /// - `files`: (optional) A dictionary of file names to SHA256 digests of blobs to create the model from.
-    /// - `adapters`: (optional) A dictionary of file names to SHA256 digests of blobs for LORA adapters.
-    /// - `template`: (optional) The prompt template for the model.
-    /// - `license`: (optional) A string or list of strings containing the license or licenses for the model.
-    /// - `system`: (optional) A string containing the system prompt for the model.
-    /// - `parameters`: (optional) A dictionary of parameters for the model.
-    /// - `messages`: (optional) A list of messages objects used to create a conversation.
-    /// - `quantize`: (optional) Quantize a non-quantized (e.g. float16) model.
-    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Methods
+    /// - `from`: Name of an existing model to create the new model from.
+    /// - `files`: A dictionary of file names to SHA256 digests of blobs to create the model from.
+    /// - `adapters`: A dictionary of file names to SHA256 digests of blobs for LORA adapters.
+    /// - `template`: The prompt template for the model.
+    /// - `license`: A string or list of strings containing the license or licenses for the model.
+    /// - `system`: A string containing the system prompt for the model.
+    /// - `parameters`: A dictionary of parameters for the model.
+    /// - `messages`: A list of messages objects used to create a conversation.
+    /// - `quantize`: Quantize a non-quantized (e.g. float16) model.
+    /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -224,9 +233,11 @@ impl Ollama {
     }
 
     /// Show information about a model including details, modelfile, template, parameters, license, system prompt.
-    /// # Parameters
+    /// # Parameter
     /// - `model`: Name of the model to show.
-    /// - `verbose`: (optional) If specified, returns full data for verbose response fields
+    ///
+    /// # Method
+    /// - `verbose`: If specified, returns full data for verbose response fields.
     ///
     /// # Errors
     /// - `OllamaError::RequestError`: There is an error with the request.
@@ -287,10 +298,12 @@ impl Ollama {
     /// Download a model from the ollama library. Cancelled pulls are resumed
     /// from where they left off, and multiple calls will share the same download progress.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `model`: Name of the model to pull.
-    /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pulling from your own library during development.
-    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Methods
+    /// - `insecure`: Allow insecure connections to the library. Only use this if you are pulling from your own library during development.
+    /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
     /// **If `stream` is not specified, a single response object is returned:**
@@ -332,10 +345,12 @@ impl Ollama {
 
     /// Upload a model to a model library. Requires registering for ollama.ai and adding a public key first.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `model`: Name of the model to push in the form of `<namespace>/<model>:<tag>`.
-    /// - `insecure`: (optional) Allow insecure connections to the library. Only use this if you are pushing to your own library during development.
-    /// - `stream`: (optional) If not specified, the response will be returned as a single response object, rather than a stream of objects.
+    ///
+    /// # Methods
+    /// - `insecure`: Allow insecure connections to the library. Only use this if you are pushing to your own library during development.
+    /// - `stream`: If not specified, the response will be returned as a single response object, rather than a stream of objects.
     ///
     /// # Returns
     /// **If `stream` is not specified, a single response object is returned:**<br>
@@ -364,12 +379,14 @@ impl Ollama {
 
     /// Generate embeddings from a model.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `model`: Name of model to generate embeddings from.
+    ///
+    /// # Methods
     /// - `input`: A list of text to generate embeddings for.
-    /// - `truncate`: (optional) Truncates the end of each input to fit within context length. Returns error if `false` and context length is exceeded. Defaults to `true`.
-    /// - `options`: (optional) Additional model parameters listed in the documentation for the Modelfile such as `temperature`.
-    /// - `keep_alive`: (optional) Controls how long the model will stay loaded into memory following the request (default: 5m).
+    /// - `truncate`: Truncates the end of each input to fit within context length. Returns error if `false` and context length is exceeded. Defaults to `true`.
+    /// - `options`: Additional model parameters listed in [`crate::abi::Parameter`] such as `temperature`.
+    /// - `keep_alive`: Controls how long the model will stay loaded into memory following the request (default: 5m).
     ///
     /// # Returns
     /// **Single input:**
@@ -415,7 +432,7 @@ impl Ollama {
     /// Ensures that the file blob (Binary Large Object) used with create a model exists on the server.
     /// This checks your Ollama server and not ollama.com.
     ///
-    /// # Parameters
+    /// # Parameter
     /// - `digest`: The SHA256 digest of the blob.
     ///
     /// # Errors
