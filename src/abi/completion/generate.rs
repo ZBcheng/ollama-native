@@ -29,8 +29,8 @@ pub struct GenerateRequest<'a> {
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
     /// such as `temperature`.
-    #[serde(skip_serializing_if = "Parameter::is_default")]
-    pub options: Parameter,
+    #[serde(skip_serializing_if = "Options::is_default")]
+    pub options: Options,
 
     /// System message to (overrides what is defined in the `Modelfile`).
     #[serde(skip_serializing_if = "Option::is_none")]
