@@ -1,3 +1,4 @@
+use crate::abi::completion::{ChatCompletionResponse, GenerateCompletionResponse};
 use crate::action::{
     OllamaClient, completion::chat::ChatAction, completion::generate::GenerateAction,
     version::version::VersionAction,
@@ -78,8 +79,8 @@ impl Ollama {
     ///     .seed(42) // Set the seed for the model
     ///     .await?;
     /// ```
-    pub fn generate<'a>(&self, model: &'a str, prompt: &'a str) -> GenerateAction<'a> {
-        GenerateAction::new(self.client.clone(), model, prompt)
+    pub fn generate<'a>(&self, model: &'a str) -> GenerateAction<'a, GenerateCompletionResponse> {
+        GenerateAction::new(self.client.clone(), model)
     }
 
     /// Generate the next message in a chat with a provided model. This is a streaming endpoint,
@@ -126,7 +127,7 @@ impl Ollama {
     ///     .messages(messages)
     ///     .await?;
     /// ```
-    pub fn chat<'a>(&self, model: &'a str) -> ChatAction<'a> {
+    pub fn chat<'a>(&self, model: &'a str) -> ChatAction<'a, ChatCompletionResponse> {
         ChatAction::new(self.client.clone(), model)
     }
 

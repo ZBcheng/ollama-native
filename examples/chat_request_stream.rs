@@ -1,6 +1,6 @@
 use ollama_native::{
     Message, Ollama,
-    abi::completion::chat::ChatResponse,
+    abi::completion::chat::ChatCompletionResponse,
     action::{IntoStream, OllamaStream},
 };
 use tokio::io::AsyncWriteExt;
@@ -9,7 +9,7 @@ use tokio_stream::StreamExt;
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Define a helper function to print the responses.
-    let print_stream = async |mut stream: OllamaStream<ChatResponse>| {
+    let print_stream = async |mut stream: OllamaStream<ChatCompletionResponse>| {
         let mut out = tokio::io::stdout();
         while let Some(Ok(item)) = stream.next().await {
             let content = item.message.unwrap().content;

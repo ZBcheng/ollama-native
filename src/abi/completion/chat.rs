@@ -1,12 +1,12 @@
 use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{
-    abi::{Message, Parameter},
+    abi::{Message, Options, Role},
     action::OllamaRequest,
 };
 
 #[derive(Debug, Clone, Default, Serialize)]
-pub struct ChatRequest<'a> {
+pub struct ChatCompletionRequest<'a> {
     /// The model name.
     pub model: &'a str,
 
@@ -24,8 +24,8 @@ pub struct ChatRequest<'a> {
     /// Additional model parameters listed in the documentation for the
     /// [Modelfile](https://github.com/ollama/ollama/blob/main/docs/modelfile.md#valid-parameters-and-values)
     /// such as `temperature`.
-    #[serde(skip_serializing_if = "Parameter::is_default")]
-    pub options: Parameter,
+    #[serde(skip_serializing_if = "Options::is_default")]
+    pub options: Options,
 
     /// If `false` the response will be returned as a single response object,
     /// rather than a stream of objects.
@@ -38,7 +38,7 @@ pub struct ChatRequest<'a> {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ChatResponse {
+pub struct ChatCompletionResponse {
     /// The model name.
     pub model: String,
 
@@ -69,6 +69,54 @@ pub struct ChatResponse {
 
     /// Time in nanoseconds spent generating the response.
     pub eval_duration: Option<i64>,
+}
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct ChatCompletionModelResponse {
+    pub model: String,
+    pub created_at: String,
+    pub message: ModelResponseMessage,
+    pub done_reason: String,
+    pub done: bool,
+}
+
+// Load a model or Unload a model.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ModelResponseMessage {
+    pub role: Role,
+    pub content: String,
+}
+
+impl<'a> ChatCompletionRequest<'a> {
+    #[inline]
+    pub fn new(model: &'a str) -> Self {
+        Self {
+            model,
+            messages: vec![],
+            ..Default::default()
+        }
+    }
+
+    #[inline]
+    pub fn to_load_model(mut self) -> Self {
+        self = Self {
+            model: self.model,
+            messages: vec![],
+            ..Default::default()
+        };
+        self
+    }
+
+    #[inline]
+    pub fn to_unload_model(mut self) -> Self {
+        self = Self {
+            model: self.model,
+            messages: vec![],
+            keep_alive: Some(0),
+            ..Default::default()
+        };
+        self
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -114,7 +162,7 @@ impl<'a> Serialize for Format<'a> {
     }
 }
 
-impl<'a> OllamaRequest for ChatRequest<'a> {
+impl<'a> OllamaRequest for ChatCompletionRequest<'a> {
     fn path(&self) -> String {
         "/api/chat".to_string()
     }
