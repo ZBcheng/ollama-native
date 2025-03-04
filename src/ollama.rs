@@ -71,7 +71,7 @@ impl Ollama {
     /// ```rust,ignore
     /// let response = ollama
     ///     .generate("llama3.1:8b", "Tell me a joke about sharks")
-    ///     .format("json") // Specify the format of the response
+    ///     .json() // Specify the format of the response
     ///     .seed(42) // Set the seed for the model
     ///     .await?;
     /// ```
@@ -104,7 +104,7 @@ impl Ollama {
     ///     .chat("llama3.1:8b")
     ///     .system_message("You are a robot who likes to tell jokes")
     ///     .user_message("Who are you?")
-    ///     .format("json")
+    ///     .json()
     ///     .await?;
     /// ```
     /// Or use a Vec of messages.

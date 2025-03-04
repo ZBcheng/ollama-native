@@ -61,14 +61,17 @@ impl<'a> GenerateAction<'a> {
         self
     }
 
-    /// Return a response in JSON format.
+    /// Return a response in given JSON format.
     #[inline]
     pub fn format(mut self, format: &'a str) -> Self {
-        let fmt = match format.to_lowercase().as_str() {
-            "json" => Format::Json,
-            _ => Format::Schema(format),
-        };
-        self.request.format = Some(fmt);
+        self.request.format = Some(Format::Schema(format));
+        self
+    }
+
+    /// Return a response in JSON format.
+    #[inline]
+    pub fn json(mut self) -> Self {
+        self.request.format = Some(Format::Json);
         self
     }
 

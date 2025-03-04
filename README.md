@@ -168,14 +168,14 @@ let resposne = ollama
         "llama3.1:8b",
         "Ollama is 22 years old and is busy saving the world.",
     )
-    .format("json") // Use "json" to get the response in JSON format.
+    .json() // Get the response in JSON format.
     .await?;
 ```
 
 #### Specified JSON Format
 ```rust
-// Specified JSON format.
-let output_format = r#"
+// Specify output JSON format.
+let format = r#"
 {
     "type": "object",
     "properties": {

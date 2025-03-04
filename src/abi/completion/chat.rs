@@ -105,9 +105,8 @@ impl<'a> Serialize for Format<'a> {
         match *self {
             Format::Json => serializer.serialize_str("json"),
             Format::Schema(ref s) => {
-                let schema_value: serde_json::Value = serde_json::from_str(s).map_err(|e| {
-                    serde::ser::Error::custom(format!("invalid format schema: {e}"))
-                })?;
+                let schema_value: serde_json::Value = serde_json::from_str(s)
+                    .map_err(|e| serde::ser::Error::custom(format!("invalid JSON schema: {e}")))?;
 
                 schema_value.serialize(serializer)
             }
