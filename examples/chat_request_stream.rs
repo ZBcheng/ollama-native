@@ -33,8 +33,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Or use the `messages` method to pass multiple messages at once.
     let messages = vec![
-        Message::new_system("You are a robot that is good at telling jokes"),
-        Message::new_user("Who are you"),
+        Message::system("You are a robot that is good at telling jokes"),
+        Message::user("Who are you"),
     ];
 
     let stream = ollama

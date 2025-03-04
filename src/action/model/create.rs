@@ -135,14 +135,14 @@ impl<'a> CreateModelAction<'a> {
     /// A system message objects used to create a conversation.
     #[inline]
     pub fn system_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_system(content));
+        self.request.messages.push(Message::system(content));
         self
     }
 
     /// A user message objects used to create a conversation.
     #[inline]
     pub fn user_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_user(content));
+        self.request.messages.push(Message::user(content));
         self
     }
 

@@ -53,19 +53,19 @@ impl<'a> ChatAction<'a> {
 
     #[inline]
     pub fn system_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_system(content));
+        self.request.messages.push(Message::system(content));
         self
     }
 
     #[inline]
     pub fn user_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_user(content));
+        self.request.messages.push(Message::user(content));
         self
     }
 
     #[inline]
     pub fn assistant_message(mut self, content: &'a str) -> Self {
-        self.request.messages.push(Message::new_assistant(content));
+        self.request.messages.push(Message::assistant(content));
         self
     }
 

@@ -33,7 +33,8 @@ pub enum Role {
 }
 
 impl Message {
-    pub fn new(role: Role, content: &str) -> Self {
+    #[inline]
+    fn new(role: Role, content: &str) -> Self {
         Self {
             role,
             content: content.to_string(),
@@ -42,33 +43,22 @@ impl Message {
         }
     }
 
-    pub fn new_system(content: &str) -> Self {
-        Self {
-            role: Role::System,
-            content: content.to_string(),
-            images: None,
-            tool_calls: None,
-        }
+    #[inline]
+    pub fn system(content: &str) -> Self {
+        Self::new(Role::System, content)
     }
 
-    pub fn new_user(content: &str) -> Self {
-        Self {
-            role: Role::User,
-            content: content.to_string(),
-            images: None,
-            tool_calls: None,
-        }
+    #[inline]
+    pub fn user(content: &str) -> Self {
+        Self::new(Role::User, content)
     }
 
-    pub fn new_assistant(content: &str) -> Self {
-        Self {
-            role: Role::Assistant,
-            content: content.to_string(),
-            images: None,
-            tool_calls: None,
-        }
+    #[inline]
+    pub fn assistant(content: &str) -> Self {
+        Self::new(Role::Assistant, content)
     }
 
+    #[inline]
     pub fn images(mut self, images: Vec<impl ToString>) -> Self {
         let mut cur_images = self.images.unwrap_or_default();
         images
@@ -78,6 +68,7 @@ impl Message {
         self
     }
 
+    #[inline]
     pub fn image(mut self, image: &str) -> Self {
         let mut cur_images = self.images.unwrap_or_default();
         cur_images.push(image.to_string());
@@ -85,6 +76,7 @@ impl Message {
         self
     }
 
+    #[inline]
     pub fn tool_calls(mut self, tool_calls: Vec<serde_json::Value>) -> Self {
         let mut cur_tool_calls = self.tool_calls.unwrap_or_default();
         tool_calls
@@ -94,6 +86,7 @@ impl Message {
         self
     }
 
+    #[inline]
     pub fn tool_call(mut self, tool_call: serde_json::Value) -> Self {
         let mut tool_calls = self.tool_calls.unwrap_or_default();
         tool_calls.push(tool_call);
@@ -182,54 +175,67 @@ pub struct Parameter {
 }
 
 impl Parameter {
+    #[inline]
     pub fn mirostat(&mut self, mirostat: u8) {
         self.mirostat = Some(mirostat);
     }
 
+    #[inline]
     pub fn mirostat_eta(&mut self, mirostat_eta: f64) {
         self.mirostat_eta = Some(mirostat_eta);
     }
 
+    #[inline]
     pub fn mirostat_tau(&mut self, mirostat_tau: f64) {
         self.mirostat_tau = Some(mirostat_tau);
     }
 
+    #[inline]
     pub fn num_ctx(&mut self, num_ctx: i64) {
         self.num_ctx = Some(num_ctx);
     }
 
+    #[inline]
     pub fn repeat_last_n(&mut self, repeat_last_n: i64) {
         self.repeat_last_n = Some(repeat_last_n);
     }
 
+    #[inline]
     pub fn repeat_penalty(&mut self, repeat_penalty: f64) {
         self.repeat_penalty = Some(repeat_penalty);
     }
 
+    #[inline]
     pub fn temperature(&mut self, temperature: f64) {
         self.temperature = Some(temperature);
     }
 
+    #[inline]
     pub fn seed(&mut self, seed: i64) {
         self.seed = Some(seed);
     }
 
+    #[inline]
     pub fn stop(&mut self, stop: &str) {
         self.stop = Some(stop.to_string());
     }
 
+    #[inline]
     pub fn num_predict(&mut self, num_predict: i64) {
         self.num_predict = Some(num_predict);
     }
 
+    #[inline]
     pub fn top_k(&mut self, top_k: i64) {
         self.top_k = Some(top_k);
     }
 
+    #[inline]
     pub fn top_p(&mut self, top_p: f64) {
         self.top_p = Some(top_p);
     }
 
+    #[inline]
     pub fn min_p(&mut self, min_p: f64) {
         self.min_p = Some(min_p);
     }
