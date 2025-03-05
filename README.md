@@ -248,6 +248,7 @@ let stream = ollama
 - [x] Version
 - [x] Check if a Blob Exists
 - [x] Push a Blob
+— [ ] Tool Calling
 
 ## Examples 📖
 - [x] [Generate Completions][generate-completion]
